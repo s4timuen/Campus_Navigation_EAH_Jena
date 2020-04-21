@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Campus Navigation EAH Jena</string>
+    <string name="title_scanner_activity">Scanner</string>
+    <string name="title_navigation_activity">Navigation</string>
+    <string name="text_view_by_room">Search by room:</string>
+    <string name="text_view_by_name">Search by person:</string>
+    <string name="text_view_button_location">Find your location:</string>
+    <string name="button_location">QR</string>
+    <string name="action_language">Language</string>
+    <string name="select_from_spinner">Please select</string>
+
+</resources>

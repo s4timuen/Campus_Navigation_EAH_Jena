@@ -1,0 +1,24 @@
+[
+    {
+        "id": 1,
+        "building": "03",
+        "floor": "03",
+        "persons": ["Herr Prof. Erfurth"],
+        "roomNumber": "33",
+        "qrCode": "8853662056074",
+        "xCoordinate": 2,
+        "yCoordinate": 3,
+        "walkable": true
+    },
+    {
+        "id": 2,
+        "building": "03",
+        "floor": "03",
+        "persons": ["Herr Prof. Stepping", "Herr Wolf"],
+        "roomNumber": "41",
+        "qrCode": "987654321",
+        "xCoordinate": 6,
+        "yCoordinate": 7,
+        "walkable": true
+    }
+]
