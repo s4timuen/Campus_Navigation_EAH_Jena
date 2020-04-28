@@ -1,194 +1,318 @@
 package de.eahjena.wi.campusnavigationeahjena.controls;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.List;
 
 import de.eahjena.wi.campusnavigationeahjena.models.Cell;
 import de.eahjena.wi.campusnavigationeahjena.models.Room;
+import de.eahjena.wi.campusnavigationeahjena.models.Transition;
+
+import static java.lang.Integer.parseInt;
 
 public class RouteCalculator {
 
     private static final String TAG = "RouteCalculator"; //$NON-NLS
 
+    //Constants
+    private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
+    private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
+    private static final String BUILDING_03_02_01_FLOOR_01 = "building_03_02_01_floor_01";
+    private static final String BUILDING_03_02_01_FLOOR_02 = "building_03_02_01_floor_02";
+    private static final String BUILDING_03_02_01_FLOOR_03 = "building_03_02_01_floor_03";
+    private static final String BUILDING_03_02_01_FLOOR_04 = "building_03_02_01_floor_04";
+    private static final String BUILDING_04_FLOOR_UG = "building_04_floor_ug";
+    private static final String BUILDING_04_FLOOR_00 = "building_04_floor_00";
+    private static final String BUILDING_04_FLOOR_01 = "building_04_floor_01";
+    private static final String BUILDING_04_FLOOR_02 = "building_04_floor_02";
+    private static final String BUILDING_04_FLOOR_03 = "building_04_floor_03";
+    private static final String BUILDING_05_FLOOR_UG = "building_05_floor_ug";
+    private static final String BUILDING_05_FLOOR_00 = "building_05_floor_00";
+    private static final String BUILDING_05_FLOOR_01 = "building_05_floor_01";
+    private static final String BUILDING_05_FLOOR_02 = "building_05_floor_02";
+    private static final String BUILDING_05_FLOOR_03 = "building_05_floor_03";
+
+    private static final int GRID_X = 40;
+    private static final int GRID_Y = 27;
+
+    private static final String JSON = ".json";
+
     //Variables
-    private Room startLocation;
-    private Room destinationLocation;
-    private ArrayList<Cell> navigationCells = new ArrayList<>();
+    private Context context;
+    private ArrayList<Transition> transitions;
+    Cell startLocation;
+    Cell destinationLocation;
 
-    private ArrayList<ArrayList<Cell>> grid;
-    private PriorityQueue<Cell> open;
-    private boolean closed[][];
-    private Cell startCell = new Cell();
-    private Cell endCell = new Cell();
-    private boolean keepCalculating = true;
-    private int costPerCell;
-
-    //TODO: Add transitions support (Stairs, Elevators, diff floors and buildings)
-    //TODO: Transitions without stairs or elevators
+    ArrayList<ArrayList<ArrayList<Cell>>> grids = null;
 
     //Constructor
-    public RouteCalculator(Room startLocation, Room destinationLocation, ArrayList<ArrayList<Cell>> grid) {
+    public RouteCalculator(Context context, Room startLocation, Room destinationLocation, ArrayList<Transition> transitions) {
+        this.context = context;
         this.startLocation = startLocation;
         this.destinationLocation = destinationLocation;
-        this.grid = grid;
+        this.transitions = transitions;
     }
 
-    //Calculation of cells to walk
-    @SuppressLint("LongLogTag")
     public ArrayList<Cell> getNavigationCells() {
 
-        try {
-            //Set start and end cells from rooms
-            startCell.setXCoordinate(startLocation.getXCoordinate());
-            startCell.setYCoordinate(startLocation.getYCoordinate());
-            startCell.setWalkability(startLocation.getWalkability());
-            endCell.setXCoordinate(destinationLocation.getXCoordinate());
-            endCell.setYCoordinate(destinationLocation.getYCoordinate());
-            endCell.setWalkability(destinationLocation.getWalkability());
+        ArrayList<ArrayList<ArrayList<Cell>>> grids;
+        ArrayList<Cell> cellsToWalk = null;
 
-            //Set priority queue with comparator
-            open = new PriorityQueue<Cell>(16, new Comparator<Cell>() {
-                @Override
-                public int compare(Cell cellOne, Cell cellTwo) {
-                    return Integer.compare(cellOne.getFinalCost(), cellTwo.getFinalCost());
+            grids = navigationBuildings();
+
+            //just use next transition till end grid
+            //add transition for all floors its going through
+            //Nav aStar for all floor grids
+
+            cellsToWalk.addAll();
+
+        return cellsToWalk;
+    }
+
+    //Get grids of floors in buildings to use (high level navigation)
+    private ArrayList<ArrayList<ArrayList<Cell>>> navigationBuildings() {
+
+        ArrayList<ArrayList<ArrayList<Cell>>> grids = null;
+
+        int startFloorInteger = startLocation.getFloorAsInteger();
+        int destinationFloorInteger = destinationLocation.getFloorAsInteger();
+        int startBuildingInteger = startLocation.getBuildingAsInteger();
+        int destinationBuildingInteger = destinationLocation.getBuildingAsInteger();
+
+        switch (startBuildingInteger){
+            case 4 :
+                startBuildingInteger = 1;
+                break;
+            case 3 :
+                startBuildingInteger = 2;
+                break;
+            case 5 :
+                startBuildingInteger = 3;
+                break;
+            default:
+                break;
+        }
+
+        switch (destinationBuildingInteger){
+            case 4 :
+                destinationBuildingInteger = 1;
+                break;
+            case 3 :
+                destinationBuildingInteger = 2;
+                break;
+            case 5 :
+                destinationBuildingInteger = 3;
+                break;
+            default:
+                break;
+        }
+
+        if (startBuildingInteger == destinationBuildingInteger) {
+            ArrayList<Integer> floors = getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger);
+            for (int index = startFloorInteger; index < floors.size(); index++) {
+                grids.add(buildGrid(startLocation.getBuilding(), getCurrentFloor(index)));
+            }
+        }
+        if (startBuildingInteger != destinationBuildingInteger) {
+
+            if (startBuildingInteger < destinationBuildingInteger) {
+                for (int i = startBuildingInteger; i <= destinationBuildingInteger; i++) {
+
+                    //TODO: grids.add(floor grids of all buildings to walk through)
+                    // -> from start floor to respective destination floor and from next respective start floor to etc or destination floor
+                    if (i == 1) {
+                        destinationFloorInteger = -1;
+                    }
+                    if (i == 2 && i < destinationBuildingInteger) {
+                        destinationFloorInteger = 1;
+                    }
+                    if (i == 2 && i == destinationBuildingInteger) {
+                        destinationFloorInteger = destinationLocation.getFloorAsInteger();
+                    }
+                    for (int index = )
                 }
-            });
+            }
+            if (destinationBuildingInteger < startBuildingInteger) {
 
-            //Set startCell for priority queue, set size of closed array and run A* algorithm
-            open.add(startCell);
-            closed = new boolean[grid.size()][grid.get(0).size()];
-            aStar();
+                for (int i = startBuildingInteger; i >= destinationBuildingInteger; i--) {
 
-            //Trace back path
-            if (closed[endCell.getXCoordinate()][endCell.getYCoordinate()]) {
-                Cell current = grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate());
-                while (current.getParent() != null) {
-                    navigationCells.add(current);
-                    current = current.getParent();
+                    //TODO: grids.add(floor grids of all buildings to walk through)
+                    if (i == 3) {
+                        destinationFloorInteger = 1;
+                    }
+                    if (i == 2 && i > destinationBuildingInteger) {
+                        destinationFloorInteger = 0;
+                    }
+                    if (i == 2 && i == destinationBuildingInteger) {
+                        destinationFloorInteger = destinationLocation.getFloorAsInteger();
+                    }
+                    //buildingsAndFloors.add(getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger));
+                }
+
+            }
+        }
+        return grids;
+    }
+
+    //Integer to String for floors
+    private String getCurrentFloor(int index) {
+
+        String currentFloor = null;
+
+        switch (index) {
+            case -1:
+                currentFloor = "ug";
+                break;
+            case 0:
+                currentFloor = "00";
+                break;
+            case 1:
+                currentFloor = "01";
+                break;
+            case 2:
+                currentFloor = "02";
+                break;
+            case 3:
+                currentFloor = "03";
+                break;
+            case 4:
+                currentFloor = "04";
+                break;
+            default:
+                break;
+        }
+        return currentFloor;
+    }
+
+    //Get the floors which have to be used within a building in respective order
+    private ArrayList<Integer> getFloorsToUseWithinBuilding(int startFloor, int destinationFloor) {
+
+        ArrayList<Integer> floors = null;
+
+        if (startFloor == destinationFloor) {
+            floors.add(startFloor);
+        }
+        if (startFloor < destinationFloor) {
+            for (int i = startFloor; i <= destinationFloor; i++) {
+                floors.add(i);
+            }
+        }
+        if (destinationFloor < startFloor) {
+            for (int i = startFloor; i >= destinationFloor; i--) {
+                floors.add(destinationFloor);
+            }
+        }
+        return floors;
+    }
+
+
+    //Build walkability grid for a floor plan
+    @SuppressLint("LongLogTag")
+    private ArrayList<ArrayList<Cell>> buildGrid(String building, String floor) {
+        ArrayList<ArrayList<Cell>> grid = null;
+
+        try {
+            JSONHandler jsonHandler = new JSONHandler();
+            String json;
+
+            //Get floor plan JSON from assets
+            json = jsonHandler.readJsonFromAssets(context,getFloorPlan(building, floor) + JSON);
+            ArrayList<Cell> walkableCells = jsonHandler.parseJsonGrid(json);
+
+            for (int x = 0; x < GRID_X; x++) {
+                grid.add(new ArrayList<Cell>());
+
+                for (int y = 0; y < GRID_Y; y++) {
+                    boolean walkable = false;
+
+                    for (int i = 0; i < walkableCells.size(); i++) {
+
+                        if (walkableCells.get(i).getXCoordinate() == x && walkableCells.get(i).getYCoordinate() == y) {
+                            grid.get(x).add(new Cell(x, y, building, floor, true));
+                            walkable = true;
+                        }
+                    }
+                    if (!walkable) {
+                        grid.get(x).add(new Cell(x, y, building, floor,false));
+                    }
                 }
             }
         } catch (Exception e) {
-            Log.e("Error calculating route " + TAG, String.valueOf(e));
+            Log.e("Error getting the floor grid", String.valueOf(e));
         }
-
-        return navigationCells;
+        return grid;
     }
 
-    //A* algorithm
-    private void aStar() {
-        while (keepCalculating) {
-            Cell currentCell = open.poll();
+    //Get floor plan String without ending (.json / .jpeg)
+    private String getFloorPlan(String building, String floor) {
+        String floorPlan;
 
-            if (currentCell.getWalkability()) {
-                closed[currentCell.getXCoordinate()][currentCell.getYCoordinate()] = true;
-
-                if (!currentCell.equals(grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate()))) {
-                    Cell testCell;
-
-                    //Check left
-                    if (currentCell.getXCoordinate() - 1 >= 0) {
-                        testCell = grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate());
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
-
-                        /**
-                        //Check left below
-                        if (currentCell.getYCoordinate() - 1 >= 0) {
-                            testCell = grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate());
-                            setCostPerCell(testCell);
-                            checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + COST_PER_CELL);
-                        }
-
-                        //Check left above
-                        if (currentCell.getYCoordinate() + 1 < grid.get(0).size()) {
-                            testCell = grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate() + 1);
-                            setCostPerCell(testCell);
-                            checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + COST_PER_CELL);
-                        }
-                         **/
-                    }
-
-                    //Check right
-                    if (currentCell.getXCoordinate() + 1 < grid.size()) {
-                        testCell = grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate());
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
-
-                        /**
-                        //Check right below
-                        if (currentCell.getYCoordinate() - 1 >= 0) {
-                            testCell = grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate() - 1);
-                            setCostPerCell(testCell);
-                            checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + COST_PER_CELL);
-                        }
-
-                        //Check right above
-                        if (currentCell.getYCoordinate() + 1 < grid.get(0).size()) {
-                            testCell = grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate() + 1);
-                            setCostPerCell(testCell);
-                            checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + COST_PER_CELL);
-                        }
-                         **/
-                    }
-
-                    //Check below
-                    if (currentCell.getYCoordinate() - 1 >= 0) {
-                        testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() - 1);
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
-                    }
-
-                    //Check above
-                    if (currentCell.getYCoordinate() + 1 < grid.get(0).size()) {
-                        testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() + 1);
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
-                    }
-                } else {
-                    keepCalculating = false;
-                }
-            }
+        switch (building + "." + floor) {
+            case "01.ug":
+            case "02.ug":
+            case "03.ug":
+                floorPlan = BUILDING_03_02_01_FLOOR_UG;
+                break;
+            case "01.00":
+            case "02.00":
+            case "03.00":
+                floorPlan = BUILDING_03_02_01_FLOOR_00;
+                break;
+            case "01.01":
+            case "02.01":
+            case "03.01":
+                floorPlan = BUILDING_03_02_01_FLOOR_01;
+                break;
+            case "01.02":
+            case "02.02":
+            case "03.02":
+                floorPlan = BUILDING_03_02_01_FLOOR_02;
+                break;
+            case "01.03":
+            case "02.03":
+            case "03.03":
+                floorPlan = BUILDING_03_02_01_FLOOR_03;
+                break;
+            case "01.04":
+            case "02.04":
+                floorPlan = BUILDING_03_02_01_FLOOR_04;
+                break;
+            case "04.ug":
+                floorPlan = BUILDING_04_FLOOR_UG;
+                break;
+            case "04.00":
+                floorPlan = BUILDING_04_FLOOR_00;
+                break;
+            case "04.01":
+                floorPlan = BUILDING_04_FLOOR_01;
+                break;
+            case "04.02":
+                floorPlan = BUILDING_04_FLOOR_02;
+                break;
+            case "04.03":
+                floorPlan = BUILDING_04_FLOOR_03;
+                break;
+            case "05.ug":
+                floorPlan = BUILDING_05_FLOOR_UG;
+                break;
+            case "05.00":
+                floorPlan = BUILDING_05_FLOOR_00;
+                break;
+            case "05.01":
+                floorPlan = BUILDING_05_FLOOR_01;
+                break;
+            case "05.02":
+                floorPlan = BUILDING_05_FLOOR_02;
+                break;
+            case "05.03":
+                floorPlan = BUILDING_05_FLOOR_03;
+                break;
+            default:
+                floorPlan = null;
         }
+        return floorPlan;
     }
-
-    //Helper methods
-    private void checkAndUpdateCost(Cell current, Cell test, int cost) {
-        if (test.getWalkability() && !closed[test.getXCoordinate()][test.getYCoordinate()]) {
-
-            int testFinalCost = test.getHeuristicCost() + cost;
-            boolean inOpen = open.contains(test);
-
-            if (!inOpen || testFinalCost < test.getFinalCost()) {
-                test.setFinalCost(cost);
-                test.setParent(current);
-
-                if (!inOpen) {
-                    open.add(test);
-                }
-            }
-        }
-    }
-
-    //Set cost of the cell to check
-    private void setCostPerCell(Cell test) {
-        Class<? extends Cell> aClass = test.getClass();
-
-        if (aClass.equals("Cell")) {
-            costPerCell = 1;
-        }
-        if (aClass.equals("Room")) {
-            costPerCell = 1;
-        }
-        if (aClass.equals("Stair")) {
-            costPerCell = 2;
-        }
-        if (aClass.equals("Elevator")) {
-            costPerCell = 1;
-        }
-    }
-
 }

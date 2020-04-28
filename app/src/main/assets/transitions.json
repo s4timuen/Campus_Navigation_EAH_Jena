@@ -2,8 +2,7 @@
     {
         "id": 1,
         "type": "stair",
-        "building": "03",
-        "floor": "03",
+        "reachableBuildings": ["03"],
         "reachableFloors": ["ug","00","01","02","03"],
         "xCoordinate": 9,
         "yCoordinate": 9,
@@ -12,19 +11,26 @@
     {
         "id": 2,
         "type": "elevator",
-        "building": "03",
-        "floor": "03",
+        "reachableBuildings": ["03"],
         "reachableFloors": ["ug","00","01","02","03"],
         "xCoordinate": 6,
         "yCoordinate": 6,
         "walkable": true
     },
     {
-        "id": 2,
+        "id": 3,
         "type": "crossing",
-        "building": "03",
-        "floor": "03",
-        "reachableFloors": ["ug","00","01","02","03"],
+        "reachableBuildings": ["03", "05"],
+        "reachableFloors": ["01", "01"],
+        "xCoordinate": 8,
+        "yCoordinate": 8,
+        "walkable": true
+    },
+    {
+        "id": 5,
+        "type": "crossing",
+        "reachableBuildings": ["03", "04"],
+        "reachableFloors": ["00", "ug"],
         "xCoordinate": 8,
         "yCoordinate": 8,
         "walkable": true

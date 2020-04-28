@@ -107,7 +107,7 @@ public class JSONHandler {
 
     //Parse JSON to stairs ArrayList<Cell>
     @SuppressLint("LongLogTag")
-    public ArrayList<Transition> parseJsonStairs(String json) {
+    public ArrayList<Transition> parseJsonTransitions(String json) {
         ArrayList<Transition> transitionData = new ArrayList<>();
 
         try {
@@ -118,8 +118,6 @@ public class JSONHandler {
                 JSONObject jEntry = jsonArray.getJSONObject(i);
                 entry.setId(jEntry.optInt("id"));
                 entry.setTypeOfTransition(jEntry.optString("type"));
-                entry.setBuilding(jEntry.optString("building"));
-                entry.setFloor(jEntry.optString("floor"));
                 entry.setXCoordinate(jEntry.optInt("xCoordinate"));
                 entry.setYCoordinate(jEntry.optInt("yCoordinate"));
                 entry.setWalkability(jEntry.optBoolean("walkable"));
@@ -130,6 +128,13 @@ public class JSONHandler {
                     floors.add(reachableFloors.getString(j));
                 }
                 entry.setReachableFloors(floors);
+
+                JSONArray reachableBuildings = jEntry.getJSONArray("reachableBuildings");
+                ArrayList<String> buildings = new ArrayList<>();
+                for (int j = 0; j < reachableBuildings.length(); j++) {
+                    buildings.add(reachableBuildings.getString(j));
+                }
+                entry.setReachableBuildings(buildings);
 
 
                 transitionData.add(entry);

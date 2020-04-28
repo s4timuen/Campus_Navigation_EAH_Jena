@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -30,7 +29,6 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
-    private static final String JSON = ".json";
 
     private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
     private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
@@ -49,8 +47,6 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String BUILDING_05_FLOOR_02 = "building_05_floor_02";
     private static final String BUILDING_05_FLOOR_03 = "building_05_floor_03";
 
-    private static final int GRID_WIDTH = 27;
-    private static final int GRID_HEIGHT = 40;
     private static final int X_SCALING = 50; //TODO: scaling after real data is available
     private static final int Y_SCALING = 50; //TODO: scaling after real data is available
 
@@ -60,13 +56,9 @@ public class NavigationActivity extends AppCompatActivity {
     private Room startLocation;
     private Room destinationLocation;
 
-
     private ArrayList<Room> rooms = new ArrayList<>();
     private ArrayList<Transition> transitions = new ArrayList<>();
-    private ArrayList<Cell> navigationCells = new ArrayList<>();
-    private ArrayList<ArrayList<Cell>> grid = new ArrayList<>();
-
-    //TODO: Transitions without stairs or elevators
+    private ArrayList<Cell> cellsToWalk = new ArrayList<>();
 
     @SuppressLint("LongLogTag")
     @Override
@@ -82,7 +74,7 @@ public class NavigationActivity extends AppCompatActivity {
         destinationQRCode = intendScannerActivity.getStringExtra("destinationQRCode");
 
         //Get rooms, stairs, elevators and crossings from JSON
-        getRoomsStairsElevatorsCrossings();
+        getRoomsAndTransitions();
 
         //Get own location room
         getOwnLocation();
@@ -91,9 +83,6 @@ public class NavigationActivity extends AppCompatActivity {
         if (!JUST_LOCATION.equals(destinationQRCode)) {
             getDestinationLocation();
         }
-
-        //Get grid of the floor of the own location
-        getFloorGrid();
 
         //Calculate route (get ArrayList<Cell> of cells to walk)
         if (!JUST_LOCATION.equals(destinationQRCode)) {
@@ -120,7 +109,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Get rooms, stairs, elevators and crossings from JSON
     @SuppressLint("LongLogTag")
-    private void getRoomsStairsElevatorsCrossings() {
+    private void getRoomsAndTransitions() {
         try {
             JSONHandler jsonHandler = new JSONHandler();
             String json;
@@ -129,7 +118,7 @@ public class NavigationActivity extends AppCompatActivity {
             rooms = jsonHandler.parseJsonRooms(json);
 
             json = jsonHandler.readJsonFromAssets(this, JSON_FILE_TRANSITIONS);
-            transitions = jsonHandler.parseJsonStairs(json);
+            transitions = jsonHandler.parseJsonTransitions(json);
 
         } catch (IOException e) {
             Log.e("Error reading or parsing JSON files", String.valueOf(e));
@@ -168,64 +157,90 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
 
-    //Get grid of the floor of the own location
-    @SuppressLint("LongLogTag")
-    private void getFloorGrid() {
-        try {
-            JSONHandler jsonHandler = new JSONHandler();
-            String json;
-
-            //Get floor plan JSON from assets
-            json = jsonHandler.readJsonFromAssets(this, getFloorPlan() + JSON);
-            ArrayList<Cell> walkableCells = jsonHandler.parseJsonGrid(json);
-
-            for (int x = 0; x < GRID_WIDTH; x++) {
-                grid.add(new ArrayList<Cell>());
-
-                for (int y = 0; y < GRID_HEIGHT; y++) {
-                    boolean walkable = false;
-
-                    for (int i = 0; i < walkableCells.size(); i++) {
-
-                        if (walkableCells.get(i).getXCoordinate() == x && walkableCells.get(i).getYCoordinate() == y) {
-                            grid.get(x).add(new Cell(x, y, true));
-                            walkable = true;
-                        }
-                    }
-
-                    if (startLocation.getXCoordinate() == x && startLocation.getYCoordinate() == y) {
-                        grid.get(x).add(new Cell(x, y, true));
-                        walkable = true;
-                    }
-
-                    if (destinationLocation.getXCoordinate() == x && destinationLocation.getYCoordinate() == y) {
-                        grid.get(x).add(new Cell(x, y, true));
-                        walkable = true;
-                    }
-
-                    if (!walkable) {
-                        grid.get(x).add(new Cell(x, y, false));
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e("Error getting the floor grid", String.valueOf(e));
-        }
-    }
 
     //Calculate route (get ArrayList<Cell> of cells to walk)
     @SuppressLint("LongLogTag")
     private void getRoute() {
-        //TODO: Add transitions support (Stairs, Elevators, diff floors and buildings)
         try {
-            RouteCalculator routeCalculator = new RouteCalculator(startLocation, destinationLocation, grid);
-            navigationCells = routeCalculator.getNavigationCells();
+            RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
+            cellsToWalk = routeCalculator.getNavigationCells(); //returns ArrayList<Cell> of all cells to walk -> draw on multiple maps
 
         } catch (Exception e) {
             Log.e("Error calculating route " + TAG, String.valueOf(e));
         }
     }
+
+    //Get floor plan String without ending (.json / .jpeg)
+    private String getFloorPlan(Cell location) {
+        String floorPlan;
+
+        switch (location.getBuilding() + "." + location.getFloor()) {
+            case "01.ug":
+            case "02.ug":
+            case "03.ug":
+                floorPlan = BUILDING_03_02_01_FLOOR_UG;
+                break;
+            case "01.00":
+            case "02.00":
+            case "03.00":
+                floorPlan = BUILDING_03_02_01_FLOOR_00;
+                break;
+            case "01.01":
+            case "02.01":
+            case "03.01":
+                floorPlan = BUILDING_03_02_01_FLOOR_01;
+                break;
+            case "01.02":
+            case "02.02":
+            case "03.02":
+                floorPlan = BUILDING_03_02_01_FLOOR_02;
+                break;
+            case "01.03":
+            case "02.03":
+            case "03.03":
+                floorPlan = BUILDING_03_02_01_FLOOR_03;
+                break;
+            case "01.04":
+            case "02.04":
+                floorPlan = BUILDING_03_02_01_FLOOR_04;
+                break;
+            case "04.ug":
+                floorPlan = BUILDING_04_FLOOR_UG;
+                break;
+            case "04.00":
+                floorPlan = BUILDING_04_FLOOR_00;
+                break;
+            case "04.01":
+                floorPlan = BUILDING_04_FLOOR_01;
+                break;
+            case "04.02":
+                floorPlan = BUILDING_04_FLOOR_02;
+                break;
+            case "04.03":
+                floorPlan = BUILDING_04_FLOOR_03;
+                break;
+            case "05.ug":
+                floorPlan = BUILDING_05_FLOOR_UG;
+                break;
+            case "05.00":
+                floorPlan = BUILDING_05_FLOOR_00;
+                break;
+            case "05.01":
+                floorPlan = BUILDING_05_FLOOR_01;
+                break;
+            case "05.02":
+                floorPlan = BUILDING_05_FLOOR_02;
+                break;
+            case "05.03":
+                floorPlan = BUILDING_05_FLOOR_03;
+                break;
+            default:
+                floorPlan = null;
+        }
+        return floorPlan;
+    }
+
+    //TODO: draw path, etc. with multiple floor plans in use and switch between (all?) floor plans
 
     //Draw image, onw location room, destination location room, stairs, elevators, crossings and route
     @SuppressLint("LongLogTag")
@@ -245,7 +260,7 @@ public class NavigationActivity extends AppCompatActivity {
         //Add floor plan JPEG from drawable to ConstraintLayout as ImageView
         try {
             ImageView floorPlan = new ImageView(getApplicationContext());
-            floorPlan.setImageResource(getResources().getIdentifier("drawable/" + getFloorPlan(), null, getPackageName()));
+            floorPlan.setImageResource(getResources().getIdentifier("drawable/" + getFloorPlan(startLocation), null, getPackageName()));
             constraintLayoutFloorPlan.addView(floorPlan, layoutParamsFloorPlan);
 
         } catch (Exception e) {
@@ -315,12 +330,12 @@ public class NavigationActivity extends AppCompatActivity {
         //Add route path to ConstraintLayout
         try {
             if (!destinationQRCode.equals(JUST_LOCATION)) {
-                for (int j = 1; j < navigationCells.size(); j++){
+                for (int j = 1; j < cellsToWalk.size(); j++){
 
                     ImageView pathCellIcon = new ImageView(getApplicationContext());
                     pathCellIcon.setImageResource(R.drawable.path_cell_icon);
-                    pathCellIcon.setX(navigationCells.get(j).getXCoordinate() * X_SCALING);
-                    pathCellIcon.setY(navigationCells.get(j).getYCoordinate() * Y_SCALING);
+                    pathCellIcon.setX(cellsToWalk.get(j).getXCoordinate() * X_SCALING);
+                    pathCellIcon.setY(cellsToWalk.get(j).getYCoordinate() * Y_SCALING);
                     constraintLayoutIcons.addView(pathCellIcon, layoutParamsIcons);
 
                 }
@@ -328,75 +343,5 @@ public class NavigationActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("Error drawing route", String.valueOf(e));
         }
-    }
-
-    //Get floor plan String without ending (.json / .jpeg)
-    private String getFloorPlan() {
-        String floorPlan;
-
-        switch (startLocation.getBuilding() + "." + startLocation.getFloor()) {
-            case "01.ug":
-            case "02.ug":
-            case "03.ug":
-                floorPlan = BUILDING_03_02_01_FLOOR_UG;
-                break;
-            case "01.00":
-            case "02.00":
-            case "03.00":
-                floorPlan = BUILDING_03_02_01_FLOOR_00;
-                break;
-            case "01.01":
-            case "02.01":
-            case "03.01":
-                floorPlan = BUILDING_03_02_01_FLOOR_01;
-                break;
-            case "01.02":
-            case "02.02":
-            case "03.02":
-                floorPlan = BUILDING_03_02_01_FLOOR_02;
-                break;
-            case "01.03":
-            case "02.03":
-            case "03.03":
-                floorPlan = BUILDING_03_02_01_FLOOR_03;
-                break;
-            case "01.04":
-            case "02.04":
-                floorPlan = BUILDING_03_02_01_FLOOR_04;
-                break;
-            case "04.ug":
-                floorPlan = BUILDING_04_FLOOR_UG;
-                break;
-            case "04.00":
-                floorPlan = BUILDING_04_FLOOR_00;
-                break;
-            case "04.01":
-                floorPlan = BUILDING_04_FLOOR_01;
-                break;
-            case "04.02":
-                floorPlan = BUILDING_04_FLOOR_02;
-                break;
-            case "04.03":
-                floorPlan = BUILDING_04_FLOOR_03;
-                break;
-            case "05.ug":
-                floorPlan = BUILDING_05_FLOOR_UG;
-                break;
-            case "05.00":
-                floorPlan = BUILDING_05_FLOOR_00;
-                break;
-            case "05.01":
-                floorPlan = BUILDING_05_FLOOR_01;
-                break;
-            case "05.02":
-                floorPlan = BUILDING_05_FLOOR_02;
-                break;
-            case "05.03":
-                floorPlan = BUILDING_05_FLOOR_03;
-                break;
-            default:
-                floorPlan = null;
-        }
-        return floorPlan;
     }
 }

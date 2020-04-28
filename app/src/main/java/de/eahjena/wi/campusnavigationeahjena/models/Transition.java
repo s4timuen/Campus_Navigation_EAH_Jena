@@ -9,13 +9,12 @@ public class Transition extends Cell{
     //Variables
     private int id;
     private String typeOfTransition; //stair, elevator, crossing
+    private ArrayList<String> reachableBuildings; // 01, 02, 03, 04, 05
     private ArrayList<String> reachableFloors; //ug, 00, 01, 02, 03, 04
 
     //Constructor
     public Transition() {
     }
-
-    //TODO: Transitions without stairs or elevators
 
     //Getter
     public int getId() {
@@ -24,6 +23,10 @@ public class Transition extends Cell{
 
     public String getTypeOfTransition() {
         return typeOfTransition;
+    }
+
+    public ArrayList<String> getReachableBuildings() {
+        return reachableBuildings;
     }
 
     public ArrayList<String> getReachableFloors() {
@@ -37,6 +40,10 @@ public class Transition extends Cell{
 
     public void setTypeOfTransition(String typeOfTransition) {
         this.typeOfTransition = typeOfTransition;
+    }
+
+    public void setReachableBuildings(ArrayList<String> reachableBuildings) {
+        this.reachableBuildings = reachableBuildings;
     }
 
     public void setReachableFloors(ArrayList<String> reachableFloors) {
