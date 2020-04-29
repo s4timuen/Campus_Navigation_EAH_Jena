@@ -8,5 +8,20 @@
     <string name="button_location">QR</string>
     <string name="action_language">Language</string>
     <string name="select_from_spinner">Please select</string>
-
+    <string name="building_03_02_01_floor_ug">House 3, 2 and 1: basement</string>
+    <string name="building_03_02_01_floor_00">House 3, 2 and 1: ground floor</string>
+    <string name="building_03_02_01_floor_01">House 3, 2 and 1: 1st floor</string>
+    <string name="building_03_02_01_floor_02">House 3, 2 and 1: 2nd floor</string>
+    <string name="building_03_02_01_floor_03">House 3, 2 and 1: 3rd floor</string>
+    <string name="building_03_02_01_floor_04">House 3, 2 and 1: 4th floor </string>
+    <string name="building_04_floor_ug">House 4: basement</string>
+    <string name="building_04_floor_00">House 4: ground floor</string>
+    <string name="building_04_floor_01">House 4: 1st floor</string>
+    <string name="building_04_floor_02">House 4: 2nd floor</string>
+    <string name="building_04_floor_03">House 4: 3rd floor</string>
+    <string name="building_05_floor_ug">House 5: basement</string>
+    <string name="building_05_floor_00">House 5: ground floor</string>
+    <string name="building_05_floor_01">House 5: 1st floor</string>
+    <string name="building_05_floor_02">House 5: 2nd floor</string>
+    <string name="building_05_floor_03">House 5: 3rd floor</string>
 </resources>

@@ -36,7 +36,7 @@ public class AStarAlgorithm {
 
     //Calculation of cells to walk on one grid
     @SuppressLint("LongLogTag")
-    private ArrayList<Cell> getNavigationCellsOnGrid() {
+    public ArrayList<Cell> getNavigationCellsOnGrid() {
 
         ArrayList<Cell> navigationCells = new ArrayList<>();
 
