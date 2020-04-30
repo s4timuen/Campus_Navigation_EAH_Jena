@@ -143,5 +143,4 @@ public class Cell {
     public void setWalkability(boolean walkable) {
         this.walkable = walkable;
     }
-
 }

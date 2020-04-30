@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,8 +21,8 @@ import java.util.List;
 
 import de.eahjena.wi.campusnavigationeahjena.R;
 import de.eahjena.wi.campusnavigationeahjena.controls.JSONHandler;
-import de.eahjena.wi.campusnavigationeahjena.controls.MapDrawer;
 import de.eahjena.wi.campusnavigationeahjena.controls.RouteCalculator;
+import de.eahjena.wi.campusnavigationeahjena.fragments.NavigationMapFragment;
 import de.eahjena.wi.campusnavigationeahjena.models.Cell;
 import de.eahjena.wi.campusnavigationeahjena.models.Room;
 import de.eahjena.wi.campusnavigationeahjena.models.Transition;
@@ -34,26 +35,6 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
-
-    private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
-    private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
-    private static final String BUILDING_03_02_01_FLOOR_01 = "building_03_02_01_floor_01";
-    private static final String BUILDING_03_02_01_FLOOR_02 = "building_03_02_01_floor_02";
-    private static final String BUILDING_03_02_01_FLOOR_03 = "building_03_02_01_floor_03";
-    private static final String BUILDING_03_02_01_FLOOR_04 = "building_03_02_01_floor_04";
-    private static final String BUILDING_04_FLOOR_UG = "building_04_floor_ug";
-    private static final String BUILDING_04_FLOOR_00 = "building_04_floor_00";
-    private static final String BUILDING_04_FLOOR_01 = "building_04_floor_01";
-    private static final String BUILDING_04_FLOOR_02 = "building_04_floor_02";
-    private static final String BUILDING_04_FLOOR_03 = "building_04_floor_03";
-    private static final String BUILDING_05_FLOOR_UG = "building_05_floor_ug";
-    private static final String BUILDING_05_FLOOR_00 = "building_05_floor_00";
-    private static final String BUILDING_05_FLOOR_01 = "building_05_floor_01";
-    private static final String BUILDING_05_FLOOR_02 = "building_05_floor_02";
-    private static final String BUILDING_05_FLOOR_03 = "building_05_floor_03";
-
-    private static final int X_SCALING = 50; //TODO: scaling after real data is available
-    private static final int Y_SCALING = 50; //TODO: scaling after real data is available
 
     //Variables
     private String destinationQRCode;
@@ -88,8 +69,16 @@ public class NavigationActivity extends AppCompatActivity {
                 Object item = adapterView.getItemAtPosition(index);
                 if (item != null && index != 0) {
                     try {
-                        MapDrawer mapDrawer = new MapDrawer(floorPlans.get(index));
-                        mapDrawer.drawNavigation();
+                        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+
+                        Bundle transitionsAsBundle = new Bundle();
+                        Bundle cellsToWalkAsBundle = new Bundle();
+                        transitionsAsBundle.putSerializable("transitions", transitions);
+                        cellsToWalkAsBundle.putSerializable("cellsToWalk", cellsToWalk);
+                        NavigationMapFragment navigationMapFragment = NavigationMapFragment.newInstance(floorPlans.get(index),
+                                null, null, transitionsAsBundle, cellsToWalkAsBundle);
+                        fragmentTransaction.replace(R.id.map_fragment_placeholder, new NavigationMapFragment());
+                        fragmentTransaction.commit();
                     } catch (Exception e) {
                         Log.e("NavigationActivity MapDrawer Error", String.valueOf(e));
                     }
@@ -125,8 +114,15 @@ public class NavigationActivity extends AppCompatActivity {
         }
 
         //Draw navigation stuff of current floor in fragment
-        MapDrawer mapDrawer = new MapDrawer(startLocation);
-        mapDrawer.drawNavigation();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        Bundle transitionsAsBundle = new Bundle();
+        Bundle cellsToWalkAsBundle = new Bundle();
+        transitionsAsBundle.putSerializable("transitions", transitions);
+        cellsToWalkAsBundle.putSerializable("cellsToWalk", cellsToWalk);
+        NavigationMapFragment navigationMapFragment = NavigationMapFragment.newInstance(null,
+                startLocation.getBuilding(), startLocation.getFloor(), transitionsAsBundle, cellsToWalkAsBundle);
+        fragmentTransaction.replace(R.id.map_fragment_placeholder, new NavigationMapFragment());
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -139,9 +135,6 @@ public class NavigationActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    /**
-     * Helper methods
-     **/
     //Get items for spinner floor plans
     private ArrayList<String> getItemsSpinner() {
 
@@ -231,75 +224,5 @@ public class NavigationActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("Error calculating route " + TAG, String.valueOf(e));
         }
-    }
-
-    //Get floor plan String without ending (.json / .jpeg)
-    private String getFloorPlan(Cell location) {
-        String floorPlan;
-
-        switch (location.getBuilding() + "." + location.getFloor()) {
-            case "01.ug":
-            case "02.ug":
-            case "03.ug":
-                floorPlan = BUILDING_03_02_01_FLOOR_UG;
-                break;
-            case "01.00":
-            case "02.00":
-            case "03.00":
-                floorPlan = BUILDING_03_02_01_FLOOR_00;
-                break;
-            case "01.01":
-            case "02.01":
-            case "03.01":
-                floorPlan = BUILDING_03_02_01_FLOOR_01;
-                break;
-            case "01.02":
-            case "02.02":
-            case "03.02":
-                floorPlan = BUILDING_03_02_01_FLOOR_02;
-                break;
-            case "01.03":
-            case "02.03":
-            case "03.03":
-                floorPlan = BUILDING_03_02_01_FLOOR_03;
-                break;
-            case "01.04":
-            case "02.04":
-                floorPlan = BUILDING_03_02_01_FLOOR_04;
-                break;
-            case "04.ug":
-                floorPlan = BUILDING_04_FLOOR_UG;
-                break;
-            case "04.00":
-                floorPlan = BUILDING_04_FLOOR_00;
-                break;
-            case "04.01":
-                floorPlan = BUILDING_04_FLOOR_01;
-                break;
-            case "04.02":
-                floorPlan = BUILDING_04_FLOOR_02;
-                break;
-            case "04.03":
-                floorPlan = BUILDING_04_FLOOR_03;
-                break;
-            case "05.ug":
-                floorPlan = BUILDING_05_FLOOR_UG;
-                break;
-            case "05.00":
-                floorPlan = BUILDING_05_FLOOR_00;
-                break;
-            case "05.01":
-                floorPlan = BUILDING_05_FLOOR_01;
-                break;
-            case "05.02":
-                floorPlan = BUILDING_05_FLOOR_02;
-                break;
-            case "05.03":
-                floorPlan = BUILDING_05_FLOOR_03;
-                break;
-            default:
-                floorPlan = null;
-        }
-        return floorPlan;
     }
 }
