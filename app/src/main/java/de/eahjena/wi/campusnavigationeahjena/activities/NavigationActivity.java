@@ -2,27 +2,29 @@ package de.eahjena.wi.campusnavigationeahjena.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 import de.eahjena.wi.campusnavigationeahjena.R;
 import de.eahjena.wi.campusnavigationeahjena.controls.JSONHandler;
 import de.eahjena.wi.campusnavigationeahjena.controls.RouteCalculator;
-import de.eahjena.wi.campusnavigationeahjena.fragments.NavigationMapFragment;
 import de.eahjena.wi.campusnavigationeahjena.models.Cell;
 import de.eahjena.wi.campusnavigationeahjena.models.Room;
 import de.eahjena.wi.campusnavigationeahjena.models.Transition;
@@ -32,9 +34,30 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String TAG = "NavigationActivity"; //$NON-NLS
 
     //Constants
+
+    //Constants
+    private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
+    private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
+    private static final String BUILDING_03_02_01_FLOOR_01 = "building_03_02_01_floor_01";
+    private static final String BUILDING_03_02_01_FLOOR_02 = "building_03_02_01_floor_02";
+    private static final String BUILDING_03_02_01_FLOOR_03 = "building_03_02_01_floor_03";
+    private static final String BUILDING_03_02_01_FLOOR_04 = "building_03_02_01_floor_04";
+    private static final String BUILDING_04_FLOOR_UG = "building_04_floor_ug";
+    private static final String BUILDING_04_FLOOR_00 = "building_04_floor_00";
+    private static final String BUILDING_04_FLOOR_01 = "building_04_floor_01";
+    private static final String BUILDING_04_FLOOR_02 = "building_04_floor_02";
+    private static final String BUILDING_04_FLOOR_03 = "building_04_floor_03";
+    private static final String BUILDING_05_FLOOR_UG = "building_05_floor_ug";
+    private static final String BUILDING_05_FLOOR_00 = "building_05_floor_00";
+    private static final String BUILDING_05_FLOOR_01 = "building_05_floor_01";
+    private static final String BUILDING_05_FLOOR_02 = "building_05_floor_02";
+    private static final String BUILDING_05_FLOOR_03 = "building_05_floor_03";
+
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
+    private static final int X_SCALING = 50; //TODO: scaling after mapping JSONs
+    private static final int Y_SCALING = 60; //TODO: scaling after mapping JSONs
 
     //Variables
     private String destinationQRCode;
@@ -59,7 +82,7 @@ public class NavigationActivity extends AppCompatActivity {
         floorPlans.addAll(getItemsSpinner());
 
         final Spinner floorPlansSpinner = findViewById(R.id.spinner_floor_plans);
-        ArrayAdapter<String> floorPlansAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, (List<String>) floorPlansSpinner);
+        ArrayAdapter<String> floorPlansAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, floorPlans);
         floorPlansSpinner.setAdapter(floorPlansAdapter);
         floorPlansSpinner.setSelection(0, false);
         floorPlansSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -69,18 +92,10 @@ public class NavigationActivity extends AppCompatActivity {
                 Object item = adapterView.getItemAtPosition(index);
                 if (item != null && index != 0) {
                     try {
-                        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-                        Bundle transitionsAsBundle = new Bundle();
-                        Bundle cellsToWalkAsBundle = new Bundle();
-                        transitionsAsBundle.putSerializable("transitions", transitions);
-                        cellsToWalkAsBundle.putSerializable("cellsToWalk", cellsToWalk);
-                        NavigationMapFragment navigationMapFragment = NavigationMapFragment.newInstance(floorPlans.get(index),
-                                null, null, transitionsAsBundle, cellsToWalkAsBundle);
-                        fragmentTransaction.replace(R.id.map_fragment_placeholder, new NavigationMapFragment());
-                        fragmentTransaction.commit();
+                        ArrayList<String> helperBuildingAndFloor = getBuildingAndFloor((String) item);
+                        drawNavigation(helperBuildingAndFloor.get(0), helperBuildingAndFloor.get(1));
                     } catch (Exception e) {
-                        Log.e("NavigationActivity MapDrawer Error", String.valueOf(e));
+                        Log.e("Error change map", String.valueOf(e));
                     }
                 }
             }
@@ -90,7 +105,6 @@ public class NavigationActivity extends AppCompatActivity {
                 //do nothing
             }
         });
-
 
         //Get extra from parent
         Intent intendScannerActivity = getIntent();
@@ -114,15 +128,7 @@ public class NavigationActivity extends AppCompatActivity {
         }
 
         //Draw navigation stuff of current floor in fragment
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        Bundle transitionsAsBundle = new Bundle();
-        Bundle cellsToWalkAsBundle = new Bundle();
-        transitionsAsBundle.putSerializable("transitions", transitions);
-        cellsToWalkAsBundle.putSerializable("cellsToWalk", cellsToWalk);
-        NavigationMapFragment navigationMapFragment = NavigationMapFragment.newInstance(null,
-                startLocation.getBuilding(), startLocation.getFloor(), transitionsAsBundle, cellsToWalkAsBundle);
-        fragmentTransaction.replace(R.id.map_fragment_placeholder, new NavigationMapFragment());
-        fragmentTransaction.commit();
+        drawNavigation(startLocation.getBuilding(), startLocation.getFloor());
     }
 
     @Override
@@ -213,16 +219,283 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
 
-
     //Calculate route (get ArrayList<Cell> of cells to walk through buildings and floors)
     @SuppressLint("LongLogTag")
     private void getRoute() {
         try {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
-            cellsToWalk = routeCalculator.getNavigationCells();
-
+            Log.i("_____TEST_NAV_01_____", String.valueOf(cellsToWalk.size()));
+            cellsToWalk.addAll(routeCalculator.getNavigationCells()); //TODO: FIX: E/Error calculating route NavigationActivity: java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+            Log.i("_____TEST_NAV_02_____", String.valueOf(cellsToWalk.size()));
         } catch (Exception e) {
             Log.e("Error calculating route " + TAG, String.valueOf(e));
         }
+    }
+
+    //Draw graphical output
+    private void drawNavigation(String building, String floor) {
+
+        //Constraint layouts to add views to
+        ConstraintLayout constraintLayoutFloorPlan = findViewById(R.id.navigation_placeholder);
+        ConstraintLayout.LayoutParams layoutParamsFloorPlan = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+
+        ConstraintLayout constraintLayoutIcons = findViewById(R.id.navigation_placeholder);
+        ConstraintLayout.LayoutParams layoutParamsIcons = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT);
+
+        //Remove views from layouts before redraw
+        if (constraintLayoutFloorPlan != null) {
+            constraintLayoutFloorPlan.removeAllViews();
+        }
+        if (constraintLayoutIcons != null) {
+            constraintLayoutIcons.removeAllViews();
+        }
+
+        //Add floor plan JPEG from drawable to ConstraintLayout as ImageView
+        try {
+            ImageView floorPlan = new ImageView(this);
+            floorPlan.setImageResource(getResources().getIdentifier("drawable/" + getFloorPlan(building, floor), null, getPackageName()));
+            constraintLayoutFloorPlan.addView(floorPlan, layoutParamsFloorPlan);
+
+        } catch (Exception e) {
+            Log.e("Error drawing floor plan", String.valueOf(e));
+        }
+
+        //Add own location room icon to Overlay
+        try {
+            if (building.equals(startLocation.getBuilding()) && floor.equals(startLocation.getFloor())) {
+                ImageView startIcon = new ImageView(this);
+                startIcon.setImageResource(R.drawable.start_icon);
+                startIcon.setX(startLocation.getXCoordinate() * X_SCALING);
+                startIcon.setY(startLocation.getYCoordinate() * Y_SCALING);
+                constraintLayoutIcons.addView(startIcon, layoutParamsIcons);
+            }
+        } catch (Exception e) {
+            Log.e("Error drawing own location room", String.valueOf(e));
+        }
+
+        //Add destination location room icon to ConstraintLayout
+        try {
+            if (!destinationQRCode.equals(JUST_LOCATION) && building.equals(destinationLocation.getBuilding()) && floor.equals(destinationLocation.getFloor())) {
+                ImageView destinationIcon = new ImageView(this);
+                destinationIcon.setImageResource(R.drawable.destination_icon);
+                destinationIcon.setX(destinationLocation.getXCoordinate() * X_SCALING);
+                destinationIcon.setY(destinationLocation.getYCoordinate() * Y_SCALING);
+                constraintLayoutIcons.addView(destinationIcon, layoutParamsIcons);
+            }
+        } catch (Exception e) {
+            Log.e("Error drawing destination location room", String.valueOf(e));
+        }
+
+        //Add transitions icons to ConstraintLayout
+        try {
+            for (int i = 0; i < transitions.size(); i++) {
+                if (transitions.get(i).getReachableBuildings().contains(building) && transitions.get(i).getReachableFloors().contains(floor)) {
+                    if (transitions.get(i).getTypeOfTransition().equals("stair")) {
+
+                        ImageView stairIcon = new ImageView(this);
+                        stairIcon.setImageResource(R.drawable.stair_icon);
+                        stairIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
+                        stairIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
+                        constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
+                    }
+                    if (transitions.get(i).getTypeOfTransition().equals("elevator")) {
+
+                        ImageView elevatorIcon = new ImageView(this);
+                        elevatorIcon.setImageResource(R.drawable.elevator_icon);
+                        elevatorIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
+                        elevatorIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
+                        constraintLayoutIcons.addView(elevatorIcon, layoutParamsIcons);
+                    }
+                    if (transitions.get(i).getTypeOfTransition().equals("crossing")) {
+
+                        ImageView crossingIcon = new ImageView(this);
+                        crossingIcon.setImageResource(R.drawable.crossing_icon);
+                        crossingIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
+                        crossingIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
+                        constraintLayoutIcons.addView(crossingIcon, layoutParamsIcons);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Error drawing transitions", String.valueOf(e));
+        }
+
+        //Add route path to ConstraintLayout
+        try {
+            if (!destinationQRCode.equals(JUST_LOCATION)) {
+                for (int j = 1; j < cellsToWalk.size(); j++) {
+                    if (cellsToWalk.get(j).getBuilding().equals(building) && cellsToWalk.get(j).getFloor().equals(floor)) { //TODO: crossings displayed on floors of start and end building in both buildings
+
+                        ImageView pathCellIcon = new ImageView(this);
+                        pathCellIcon.setImageResource(R.drawable.path_cell_icon);
+                        pathCellIcon.setX(cellsToWalk.get(j).getXCoordinate() * X_SCALING);
+                        pathCellIcon.setY(cellsToWalk.get(j).getYCoordinate() * Y_SCALING);
+                        constraintLayoutIcons.addView(pathCellIcon, layoutParamsIcons);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Error drawing route", String.valueOf(e));
+        }
+    }
+
+    //Get floor plan String without ending (.jpeg) from building and floor
+    private String getFloorPlan(String building, String floor) {
+        String floorPlan;
+
+        switch (building + "." + floor) {
+            case "01.ug":
+            case "02.ug":
+            case "03.ug":
+                floorPlan = BUILDING_03_02_01_FLOOR_UG;
+                break;
+            case "01.00":
+            case "02.00":
+            case "03.00":
+                floorPlan = BUILDING_03_02_01_FLOOR_00;
+                break;
+            case "01.01":
+            case "02.01":
+            case "03.01":
+                floorPlan = BUILDING_03_02_01_FLOOR_01;
+                break;
+            case "01.02":
+            case "02.02":
+            case "03.02":
+                floorPlan = BUILDING_03_02_01_FLOOR_02;
+                break;
+            case "01.03":
+            case "02.03":
+            case "03.03":
+                floorPlan = BUILDING_03_02_01_FLOOR_03;
+                break;
+            case "01.04":
+            case "02.04":
+                floorPlan = BUILDING_03_02_01_FLOOR_04;
+                break;
+            case "04.ug":
+                floorPlan = BUILDING_04_FLOOR_UG;
+                break;
+            case "04.00":
+                floorPlan = BUILDING_04_FLOOR_00;
+                break;
+            case "04.01":
+                floorPlan = BUILDING_04_FLOOR_01;
+                break;
+            case "04.02":
+                floorPlan = BUILDING_04_FLOOR_02;
+                break;
+            case "04.03":
+                floorPlan = BUILDING_04_FLOOR_03;
+                break;
+            case "05.ug":
+                floorPlan = BUILDING_05_FLOOR_UG;
+                break;
+            case "05.00":
+                floorPlan = BUILDING_05_FLOOR_00;
+                break;
+            case "05.01":
+                floorPlan = BUILDING_05_FLOOR_01;
+                break;
+            case "05.02":
+                floorPlan = BUILDING_05_FLOOR_02;
+                break;
+            case "05.03":
+                floorPlan = BUILDING_05_FLOOR_03;
+                break;
+            default:
+                floorPlan = null;
+        }
+        return floorPlan;
+    }
+
+    //Get building and floor Strings from floor plan String
+    private ArrayList<String> getBuildingAndFloor(String in) {
+
+        ArrayList<String> helperBuildingAndFloor = new ArrayList<>();
+
+        Locale currentLocale = getResources().getConfiguration().locale;
+
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_ug))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("ug");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_00))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("00");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_01))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("01");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_02))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("02");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_03))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("03");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_04))) {
+            helperBuildingAndFloor.add("03");
+            helperBuildingAndFloor.add("04");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_04_floor_ug))) {
+            helperBuildingAndFloor.add("04");
+            helperBuildingAndFloor.add("ug");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_04_floor_00))) {
+            helperBuildingAndFloor.add("04");
+            helperBuildingAndFloor.add("00");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_04_floor_01))) {
+            helperBuildingAndFloor.add("04");
+            helperBuildingAndFloor.add("01");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_04_floor_02))) {
+            helperBuildingAndFloor.add("04");
+            helperBuildingAndFloor.add("02");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_04_floor_03))) {
+            helperBuildingAndFloor.add("04");
+            helperBuildingAndFloor.add("03");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_05_floor_ug))) {
+            helperBuildingAndFloor.add("05");
+            helperBuildingAndFloor.add("ug");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_05_floor_00))) {
+            helperBuildingAndFloor.add("05");
+            helperBuildingAndFloor.add("00");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_05_floor_01))) {
+            helperBuildingAndFloor.add("05");
+            helperBuildingAndFloor.add("01");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_05_floor_02))) {
+            helperBuildingAndFloor.add("05");
+            helperBuildingAndFloor.add("02");
+        }
+        if (in.equals(getLocaleStringResource(currentLocale, R.string.building_05_floor_03))) {
+            helperBuildingAndFloor.add("05");
+            helperBuildingAndFloor.add("03");
+        }
+        return helperBuildingAndFloor;
+    }
+
+    //Get locale
+    private String getLocaleStringResource(Locale currentLocale, int floorPlan) {
+
+        String localeString;
+
+        Configuration configuration = new Configuration(this.getResources().getConfiguration());
+        configuration.setLocale(currentLocale);
+        localeString = this.createConfigurationContext(configuration).getString(floorPlan);
+
+        return localeString;
     }
 }

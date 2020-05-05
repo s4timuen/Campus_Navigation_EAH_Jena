@@ -1,38 +1,128 @@
 [
     {
-        "id": 1,
         "type": "stair",
-        "reachableBuildings": ["03"],
-        "reachableFloors": ["ug","00","01","02","03"],
-        "xCoordinate": 9,
-        "yCoordinate": 9,
+        "connectedCells": [
+            {
+                "building": "03",
+                "floor": "03",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "03",
+                "floor": "02",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "03",
+                "floor": "01",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "03",
+                "floor": "00",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "03",
+                "floor": "ug",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            }
+        ],
         "walkable": true
     },
     {
-        "id": 2,
         "type": "elevator",
-        "reachableBuildings": ["03"],
-        "reachableFloors": ["ug","00","01","02","03"],
-        "xCoordinate": 6,
-        "yCoordinate": 6,
+        "connectedCells": [
+            {
+                "building": "03",
+                "floor": "03",
+                "xCoordinate": 4,
+                "yCoordinate": 5
+            },
+            {
+                "building": "03",
+                "floor": "02",
+                "xCoordinate": 4,
+                "yCoordinate": 5
+            },
+            {
+                "building": "03",
+                "floor": "01",
+                "xCoordinate": 4,
+                "yCoordinate": 5
+            },
+            {
+                "building": "03",
+                "floor": "00",
+                "xCoordinate": 4,
+                "yCoordinate": 5
+            },
+            {
+                "building": "03",
+                "floor": "ug",
+                "xCoordinate": 4,
+                "yCoordinate": 5
+            }
+        ],
         "walkable": true
     },
     {
-        "id": 3,
         "type": "crossing",
-        "reachableBuildings": ["03", "05"],
-        "reachableFloors": ["01", "01"],
-        "xCoordinate": 8,
-        "yCoordinate": 8,
+        "connectedCells": [
+            {
+                "building": "04",
+                "floor": "ug",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "03",
+                "floor": "01",
+                "xCoordinate": 3,
+                "yCoordinate": 3
+            }
+        ],
         "walkable": true
     },
     {
-        "id": 5,
         "type": "crossing",
-        "reachableBuildings": ["03", "04"],
-        "reachableFloors": ["00", "ug"],
-        "xCoordinate": 8,
-        "yCoordinate": 8,
+        "connectedCells": [
+            {
+                "building": "03",
+                "floor": "01",
+                "xCoordinate": 9,
+                "yCoordinate": 9
+            },
+            {
+                "building": "05",
+                "floor": "01",
+                "xCoordinate": 5,
+                "yCoordinate": 6
+            }
+        ],
         "walkable": true
-    }
+    },
+    {
+    "type": "elevator",
+        "connectedCells": [
+            {
+                "building": "04",
+                "floor": "00",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            },
+            {
+                "building": "04",
+                "floor": "01",
+                "xCoordinate": 2,
+                "yCoordinate": 2
+            }
+        ],
+    "walkable": true
+}
 ]

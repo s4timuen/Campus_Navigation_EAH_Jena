@@ -145,5 +145,4 @@ public class JSONHandler {
 
         return transitionData;
     }
-
 }

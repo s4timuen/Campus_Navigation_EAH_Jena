@@ -7,7 +7,6 @@ public class Room extends Cell{
     private static final String TAG = "Room"; //$NON-NLS
 
     //Variables
-    private int id;
     private String roomNumber;
     private ArrayList<String> persons;
     private String qrCode;
@@ -18,10 +17,6 @@ public class Room extends Cell{
     }
 
     //Getter
-    public int getId() {
-        return id;
-    }
-
     public String getRoomNumber() {
         return roomNumber;
     }
@@ -40,10 +35,6 @@ public class Room extends Cell{
     }
 
     //Setter
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void setRoomNumber(String roomNumber) {
         this.roomNumber = roomNumber;
     }

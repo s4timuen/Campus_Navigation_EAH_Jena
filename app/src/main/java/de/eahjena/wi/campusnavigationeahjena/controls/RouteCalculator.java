@@ -42,10 +42,11 @@ public class RouteCalculator {
     //Variables
     private Context context;
     private ArrayList<Transition> transitions;
-    Cell startLocation;
-    Cell destinationLocation;
+    private Cell startLocation;
+    private Cell destinationLocation;
 
-    ArrayList<ArrayList<ArrayList<Cell>>> grids = null;
+    private ArrayList<ArrayList<ArrayList<Cell>>> grids = new ArrayList<>();
+    private ArrayList<Cell> cellsToWalk = new ArrayList<>();
 
     //Constructor
     public RouteCalculator(Context context, Room startLocation, Room destinationLocation, ArrayList<Transition> transitions) {
@@ -58,11 +59,8 @@ public class RouteCalculator {
     //Get all cells to walk from start to destination location
     public ArrayList<Cell> getNavigationCells() {
 
-        ArrayList<ArrayList<ArrayList<Cell>>> grids;
-        ArrayList<Cell> cellsToWalk = null;
-
         Cell startCell = startLocation;
-        Cell endCell = null;
+        Cell endCell = new Cell();
 
         grids = navigationBuildings();
 
@@ -114,7 +112,10 @@ public class RouteCalculator {
 
             //Get path through floor
             AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
+            Log.i("_____TEST_CAL_01_01_____", String.valueOf(cellsToWalk.size()));
+            Log.i("_____TEST_CAL_01_02_____", String.valueOf(endCell.getXCoordinate()));
             cellsToWalk.addAll(aStarAlgorithm.getNavigationCellsOnGrid());
+            Log.i("_____TEST_CAL_02_____", String.valueOf(cellsToWalk.size()));
 
             //Set next startCell
             if (endCell == destinationLocation) {
@@ -137,7 +138,7 @@ public class RouteCalculator {
     //Get grids of floors in buildings to use (high level navigation)
     private ArrayList<ArrayList<ArrayList<Cell>>> navigationBuildings() {
 
-        ArrayList<ArrayList<ArrayList<Cell>>> grids = null;
+        ArrayList<ArrayList<ArrayList<Cell>>> gridsToAdd = new ArrayList<>();
 
         int startFloorInteger = startLocation.getFloorAsInteger();
         int destinationFloorInteger = destinationLocation.getFloorAsInteger();
@@ -174,35 +175,38 @@ public class RouteCalculator {
 
         //Start and end location in same house
         if (startBuildingInteger == destinationBuildingInteger) {
-            ArrayList<Integer> floors = getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger);
-            for (int index = startFloorInteger; index < floors.size(); index++) {
-                grids.add(buildGrid(startLocation.getBuilding(), getCurrentFloor(index)));
+
+            ArrayList<Integer> floors = new ArrayList<>();
+            floors = getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger);
+
+            for (int index = 0; index < floors.size(); index++) {
+                gridsToAdd.add(buildGrid(startLocation.getBuilding(), getCurrentFloor(floors.get(index))));
             }
         }
 
         //Start and end location in different houses
         if (startBuildingInteger != destinationBuildingInteger) {
-
             //From house 4 to 3 or 4 to 5 or 3 to 5
             if (startBuildingInteger <= destinationBuildingInteger) {
                 for (int i = startBuildingInteger; i <= destinationBuildingInteger; i++) {
 
                     //From start floor to -1 in house 4
                     if (i == 1) {
-                        for (int index = startFloorInteger; index >= -1; index++) {
-                            grids.add(buildGrid("04", getCurrentFloor(index)));
+                        for (int index = startFloorInteger; index >= -1; index--) {
+                            gridsToAdd.add(buildGrid("04", getCurrentFloor(index)));
                         }
                     }
+
                     //Floor 0 to destination floor in house 3
                     if (i == 2 && i == destinationBuildingInteger) {
                         if (destinationFloorInteger < 0) {
                             for (int index = 0; index >= destinationFloorInteger; index--) {
-                                grids.add(buildGrid("03", getCurrentFloor(index)));
+                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                             }
                         }
                         if (destinationFloorInteger > 0) {
                             for (int index = 0; index <= destinationFloorInteger; index++) {
-                                grids.add(buildGrid("03", getCurrentFloor(index)));
+                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                             }
                         }
                     }
@@ -210,19 +214,19 @@ public class RouteCalculator {
                         //From floor 0 to 1 in house 3 if start building is house 4
                         if (startBuildingInteger == 1) {
                             for (int index = 0; index <= 1; index++) {
-                                grids.add(buildGrid("03", getCurrentFloor(index)));
+                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                             }
                         }
                         //From start floor to floor 1 if start building is house 3
                         if (startBuildingInteger == 2) {
                             if (startFloorInteger < 1 ) {
                                 for (int index = startFloorInteger; index <= 1; index++) {
-                                    grids.add(buildGrid("03", getCurrentFloor(index)));
+                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                                 }
                             }
                             if (startFloorInteger > 1) {
                                 for ( int index = startFloorInteger; index >= 1; index--) {
-                                    grids.add(buildGrid("03", getCurrentFloor(index)));
+                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                                 }
                             }
                         }
@@ -238,12 +242,12 @@ public class RouteCalculator {
                     if (i == 3) {
                         if (startFloorInteger < 1) {
                             for (int index = startFloorInteger; index <= 1; index++) {
-                                grids.add(buildGrid("05", getCurrentFloor(index)));
+                                gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
                             }
                         }
                         if (startFloorInteger > 1) {
                             for (int index = startFloorInteger; index >= 1; index--) {
-                                grids.add(buildGrid("05", getCurrentFloor(index)));
+                                gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
                             }
                         }
 
@@ -251,13 +255,13 @@ public class RouteCalculator {
                     //From floor 1 to destination floor in house 3
                     if (i == 2 && i == destinationBuildingInteger) {
                         if (destinationFloorInteger > 1) {
-                            for (int index = 1; index <= destinationFloorInteger; index--) {
-                                grids.add(buildGrid("03", getCurrentFloor(index)));
+                            for (int index = 1; index <= destinationFloorInteger; index++) {
+                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                             }
                         }
                         if (destinationFloorInteger < 1) {
-                            for (int index = 1; index <= destinationFloorInteger; index++) {
-                                grids.add(buildGrid("03", getCurrentFloor(index)));
+                            for (int index = 1; index >= destinationFloorInteger; index--) {
+                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                             }
                         }
 
@@ -267,12 +271,12 @@ public class RouteCalculator {
                         if (startBuildingInteger == 2) {
                             if (startFloorInteger < 0) {
                                 for (int index = startFloorInteger; index <= 0; index++) {
-                                    grids.add(buildGrid("03", getCurrentFloor(index)));
+                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                                 }
                             }
                             if (startFloorInteger > 0) {
                                 for (int index = startFloorInteger; index >= 0; index--) {
-                                    grids.add(buildGrid("03", getCurrentFloor(index)));
+                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                                 }
                             }
                         }
@@ -280,13 +284,13 @@ public class RouteCalculator {
                     //From floor 1 to floor 0 if start building is house 5
                     if (startBuildingInteger > 2) {
                         for (int index = 1; index >= 0; index--) {
-                            grids.add(buildGrid("03", getCurrentFloor(index)));
+                            gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
                         }
                     }
                 }
             }
         }
-        return grids;
+        return gridsToAdd;
     }
 
     //Integer to String for floors
@@ -322,8 +326,7 @@ public class RouteCalculator {
     //Get the floors which have to be used within a building in respective order
     private ArrayList<Integer> getFloorsToUseWithinBuilding(int startFloor, int destinationFloor) {
 
-        ArrayList<Integer> floors = null;
-
+        ArrayList<Integer> floors = new ArrayList<>();
         if (startFloor == destinationFloor) {
             floors.add(startFloor);
         }
@@ -344,7 +347,7 @@ public class RouteCalculator {
     //Build walkability grid for a floor plan
     @SuppressLint("LongLogTag")
     private ArrayList<ArrayList<Cell>> buildGrid(String building, String floor) {
-        ArrayList<ArrayList<Cell>> grid = null;
+        ArrayList<ArrayList<Cell>> grid = new ArrayList<>();
 
         try {
             JSONHandler jsonHandler = new JSONHandler();

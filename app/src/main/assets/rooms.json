@@ -1,6 +1,5 @@
 [
     {
-        "id": 1,
         "building": "03",
         "floor": "03",
         "persons": ["Herr Prof. Erfurth"],
@@ -11,7 +10,6 @@
         "walkable": true
     },
     {
-        "id": 2,
         "building": "03",
         "floor": "03",
         "persons": ["Herr Prof. Stepping", "Herr Wolf"],
