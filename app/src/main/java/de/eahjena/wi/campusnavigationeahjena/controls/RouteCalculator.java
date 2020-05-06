@@ -1,6 +1,5 @@
 package de.eahjena.wi.campusnavigationeahjena.controls;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
@@ -64,75 +63,87 @@ public class RouteCalculator {
 
         ArrayList<ArrayList<ArrayList<Cell>>> grids = navigationBuildings();
 
-        for (int index = 0; index < grids.size(); index++) {
+        try {
+            for (int index = 0; index < grids.size(); index++) {
 
-            //Set endCell
-            if (startCell.getBuilding().equals(destinationLocation.getBuilding())
-                    && startCell.getFloor().equals(destinationLocation.getFloor())) {
+                //Set endCell
+                if (startCell != null && startCell.getBuilding().equals(destinationLocation.getBuilding())
+                        && startCell.getFloor().equals(destinationLocation.getFloor())) {
 
-                endCell = destinationLocation;
-            }
-            if (!startCell.getBuilding().equals(destinationLocation.getBuilding())
-                    && !startCell.getFloor().equals(destinationLocation.getFloor())) {
+                    endCell = destinationLocation;
+                }
+                if (startCell != null && !startCell.getBuilding().equals(destinationLocation.getBuilding())
+                        && !startCell.getFloor().equals(destinationLocation.getFloor())) {
 
-                ArrayList<Transition> reachableTransitions = new ArrayList<>();
+                    ArrayList<Transition> reachableTransitions = new ArrayList<>();
 
-                //get all reachable transitions
-                for (int j = 0; j < transitions.size(); j++) {
-                    if (transitions.get(j).getBuilding().equals(startCell.getBuilding())
-                            && transitions.get(j).getFloor().equals(startCell.getFloor())) {
+                    //get all reachable transitions
+                    for (int j = 0; j < transitions.size(); j++) {
+                        if (transitions.get(j).getBuilding().equals(startCell.getBuilding())
+                                && transitions.get(j).getFloor().equals(startCell.getFloor())) {
 
-                        reachableTransitions.add(transitions.get(j));
+                            reachableTransitions.add(transitions.get(j));
+                        }
+                    }
+                    //aStar all reachable transitions, get costs of each and set endCell
+                    for (int j = 0; j < reachableTransitions.size(); j++) {
+
+                        AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, reachableTransitions.get(j), grids.get(index));
+                        ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
+
+                        reachableTransitions.get(j).setFinalCost(navigationCells.size());
+
+                        new PriorityQueue<>(16, new Comparator<Cell>() {
+                            @Override
+                            public int compare(Cell cellOne, Cell cellTwo) {
+                                return Integer.compare(cellOne.getFinalCost(), cellTwo.getFinalCost());
+                            }
+                        });
+
+                        transitions.sort(new Comparator<Transition>() {
+                            public int compare(Transition TransitionOne, Transition TransitionTwo) {
+                                return Integer.compare(TransitionOne.getFinalCost(), TransitionTwo.getFinalCost());
+                            }
+                        });
+
+                        endCellTransition = transitions.get(0);
                     }
                 }
-                //aStar all reachable transitions, get costs of each and set endCell
-                for (int j = 0; j < reachableTransitions.size(); j++) {
 
-                    AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, reachableTransitions.get(j), grids.get(index));
-                    ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
+                //Get path through floor
+                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
+                cellsToWalk.addAll(aStarAlgorithm.getNavigationCellsOnGrid());
 
-                    reachableTransitions.get(j).setFinalCost(navigationCells.size());
+                //Set next startCell
+                if (endCell == destinationLocation) {
 
-                    new PriorityQueue<>(16, new Comparator<Cell>() {
-                        @Override
-                        public int compare(Cell cellOne, Cell cellTwo) {
-                            return Integer.compare(cellOne.getFinalCost(), cellTwo.getFinalCost());
-                        }
-                    });
-
-                    transitions.sort(new Comparator<Transition>() {
-                        public int compare(Transition TransitionOne, Transition TransitionTwo) {
-                            return Integer.compare(TransitionOne.getFinalCost(), TransitionTwo.getFinalCost());
-                        }
-                    });
-
-                    endCellTransition = transitions.get(0);
+                    startCell = null;
                 }
-            }
+                if (endCell != destinationLocation) {
 
-            //Get path through floor
-            AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
-            cellsToWalk.addAll(aStarAlgorithm.getNavigationCellsOnGrid());
+                    if (startCell != null) {
+                        startCell.setBuilding(grids.get(index + 1).get(0).get(0).getBuilding());
+                    }
+                    if (startCell != null) {
+                        startCell.setFloor(grids.get(index + 1).get(0).get(0).getFloor());
+                    }
 
-            //Set next startCell
-            if (endCell == destinationLocation) {
+                    for (int i = 0; i < endCellTransition.getConnectedCells().size(); i++) {
+                        if (endCellTransition.getConnectedCells().get(i).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                                && endCellTransition.getConnectedCells().get(i).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
 
-                startCell = null;
-            }
-            if (endCell != destinationLocation) {
-
-                startCell.setBuilding(grids.get(index + 1).get(0).get(0).getBuilding());
-                startCell.setFloor(grids.get(index + 1).get(0).get(0).getFloor());
-
-                for (int i = 0; i < endCellTransition.getConnectedCells().size(); i++) {
-                    if (endCellTransition.getConnectedCells().get(i).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
-                            && endCellTransition.getConnectedCells().get(i).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
-
-                        startCell.setXCoordinate(endCellTransition.getConnectedCells().get(i).getXCoordinate());
-                        startCell.setYCoordinate(endCellTransition.getConnectedCells().get(i).getYCoordinate());
+                            if (startCell != null) {
+                                startCell.setXCoordinate(endCellTransition.getConnectedCells().get(i).getXCoordinate());
+                            }
+                            if (startCell != null) {
+                                startCell.setYCoordinate(endCellTransition.getConnectedCells().get(i).getYCoordinate());
+                            }
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG + "error getting navigation cells", String.valueOf(e));
         }
         return cellsToWalk;
     }
@@ -175,124 +186,153 @@ public class RouteCalculator {
                 break;
         }
 
-        //Start and end location in same house
-        if (startBuildingInteger == destinationBuildingInteger) {
+         try {
+             //Start and end location in same house
+             if (startBuildingInteger == destinationBuildingInteger) {
 
-            ArrayList<Integer> floors = new ArrayList<>();
-            floors = getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger);
+                 ArrayList<Integer> floors;
+                 floors = getFloorsToUseWithinBuilding(startFloorInteger, destinationFloorInteger);
 
-            for (int index = 0; index < floors.size(); index++) {
-                gridsToAdd.add(buildGrid(startLocation.getBuilding(), getCurrentFloor(floors.get(index))));
-            }
-        }
+                 for (int index = 0; index < floors.size(); index++) {
+                     gridsToAdd.add(buildGrid(startLocation.getBuilding(), getCurrentFloor(floors.get(index))));
+                 }
+             }
 
-        //Start and end location in different houses
-        if (startBuildingInteger != destinationBuildingInteger) {
-            //From house 4 to 3 or 4 to 5 or 3 to 5
-            if (startBuildingInteger <= destinationBuildingInteger) {
-                for (int i = startBuildingInteger; i <= destinationBuildingInteger; i++) {
+             //Start and end location in different houses
+             if (startBuildingInteger != destinationBuildingInteger) {
+                 //From house 4 to 3 or 4 to 5 or 3 to 5
+                 if (startBuildingInteger <= destinationBuildingInteger) {
+                     for (int i = startBuildingInteger; i <= destinationBuildingInteger; i++) {
 
-                    //From start floor to -1 in house 4
-                    if (i == 1) {
-                        for (int index = startFloorInteger; index >= -1; index--) {
-                            gridsToAdd.add(buildGrid("04", getCurrentFloor(index)));
-                        }
-                    }
+                         //From start floor to -1 in house 4
+                         if (i == 1) {
+                             for (int index = startFloorInteger; index >= -1; index--) {
+                                 gridsToAdd.add(buildGrid("04", getCurrentFloor(index)));
+                             }
+                         }
 
-                    //Floor 0 to destination floor in house 3
-                    if (i == 2 && i == destinationBuildingInteger) {
-                        if (destinationFloorInteger < 0) {
-                            for (int index = 0; index >= destinationFloorInteger; index--) {
-                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                            }
-                        }
-                        if (destinationFloorInteger > 0) {
-                            for (int index = 0; index <= destinationFloorInteger; index++) {
-                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                            }
-                        }
-                    }
-                    if (i == 2 && i < destinationBuildingInteger) {
-                        //From floor 0 to 1 in house 3 if start building is house 4
-                        if (startBuildingInteger == 1) {
-                            for (int index = 0; index <= 1; index++) {
-                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                            }
-                        }
-                        //From start floor to floor 1 if start building is house 3
-                        if (startBuildingInteger == 2) {
-                            if (startFloorInteger < 1 ) {
-                                for (int index = startFloorInteger; index <= 1; index++) {
-                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                                }
-                            }
-                            if (startFloorInteger > 1) {
-                                for ( int index = startFloorInteger; index >= 1; index--) {
-                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                         //Floor 0 to destination floor in house 3
+                         if (i == 2 && i == destinationBuildingInteger) {
+                             if (destinationFloorInteger < 0) {
+                                 for (int index = 0; index >= destinationFloorInteger; index--) {
+                                     gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                 }
+                             }
+                             if (destinationFloorInteger > 0) {
+                                 for (int index = 0; index <= destinationFloorInteger; index++) {
+                                     gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                 }
+                             }
+                         }
+                         if (i == 2 && i < destinationBuildingInteger) {
+                             //From floor 0 to 1 in house 3 if start building is house 4
+                             if (startBuildingInteger == 1) {
+                                 for (int index = 0; index <= 1; index++) {
+                                     gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                 }
+                             }
+                             //From start floor to floor 1 if start building is house 3
+                             if (startBuildingInteger == 2) {
+                                 if (startFloorInteger < 1) {
+                                     for (int index = startFloorInteger; index <= 1; index++) {
+                                         gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                     }
+                                 }
+                                 if (startFloorInteger > 1) {
+                                     for (int index = startFloorInteger; index >= 1; index--) {
+                                         gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 }
 
-            //From house 5 to 3 / house 3 to 4 / house 5 to 4
-            if (destinationBuildingInteger < startBuildingInteger) {
-                for (int i = startBuildingInteger; i >= destinationBuildingInteger; i--) {
+                 //From house 5 to 3 / house 3 to 4 / house 5 to 4
+                 if (destinationBuildingInteger < startBuildingInteger) {
+                     for (int i = startBuildingInteger; i >= destinationBuildingInteger; i--) {
 
-                    //From start floor to 1 in house 5
-                    if (i == 3) {
-                        if (startFloorInteger < 1) {
-                            for (int index = startFloorInteger; index <= 1; index++) {
-                                gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
-                            }
-                        }
-                        if (startFloorInteger > 1) {
-                            for (int index = startFloorInteger; index >= 1; index--) {
-                                gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
-                            }
-                        }
+                         //From start floor to 1 in house 5
+                         if (i == 3) {
+                             if (startFloorInteger < 1) {
+                                 for (int index = startFloorInteger; index <= 1; index++) {
+                                     gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
+                                 }
+                             }
+                             if (startFloorInteger > 1) {
+                                 for (int index = startFloorInteger; index >= 1; index--) {
+                                     gridsToAdd.add(buildGrid("05", getCurrentFloor(index)));
+                                 }
+                             }
 
-                    }
-                    //From floor 1 to destination floor in house 3
-                    if (i == 2 && i == destinationBuildingInteger) {
-                        if (destinationFloorInteger > 1) {
-                            for (int index = 1; index <= destinationFloorInteger; index++) {
-                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                            }
-                        }
-                        if (destinationFloorInteger < 1) {
-                            for (int index = 1; index >= destinationFloorInteger; index--) {
-                                gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                            }
-                        }
+                         }
+                         //From floor 1 to destination floor in house 3
+                         if (i == 2 && i == destinationBuildingInteger) {
+                             if (destinationFloorInteger > 1) {
+                                 for (int index = 1; index <= destinationFloorInteger; index++) {
+                                     gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                 }
+                             }
+                             if (destinationFloorInteger < 1) {
+                                 for (int index = 1; index >= destinationFloorInteger; index--) {
+                                     gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                 }
+                             }
 
-                    }
-                    //From start floor to floor 0 if start building is house 3
-                    if (i == 2 && i > destinationBuildingInteger) {
-                        if (startBuildingInteger == 2) {
-                            if (startFloorInteger < 0) {
-                                for (int index = startFloorInteger; index <= 0; index++) {
-                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                                }
-                            }
-                            if (startFloorInteger > 0) {
-                                for (int index = startFloorInteger; index >= 0; index--) {
-                                    gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                                }
-                            }
-                        }
-                    }
-                    //From floor 1 to floor 0 if start building is house 5
-                    if (startBuildingInteger > 2) {
-                        for (int index = 1; index >= 0; index--) {
-                            gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
-                        }
-                    }
-                }
-            }
-        }
+                         }
+                         //From start floor to floor 0 if start building is house 3
+                         if (i == 2 && i > destinationBuildingInteger) {
+                             if (startBuildingInteger == 2) {
+                                 if (startFloorInteger < 0) {
+                                     for (int index = startFloorInteger; index <= 0; index++) {
+                                         gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                     }
+                                 }
+                                 if (startFloorInteger > 0) {
+                                     for (int index = startFloorInteger; index >= 0; index--) {
+                                         gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                                     }
+                                 }
+                             }
+                         }
+                         //From floor 1 to floor 0 if start building is house 5
+                         if (startBuildingInteger > 2) {
+                             for (int index = 1; index >= 0; index--) {
+                                 gridsToAdd.add(buildGrid("03", getCurrentFloor(index)));
+                             }
+                         }
+                     }
+                 }
+             }
+         } catch (Exception e) {
+             Log.e(TAG + "error navigating through buildings", String.valueOf(e));
+         }
         return gridsToAdd;
+    }
+
+    //Get the floors which have to be used within a building in respective order
+    private ArrayList<Integer> getFloorsToUseWithinBuilding(int startFloor, int destinationFloor) {
+
+        ArrayList<Integer> floors = new ArrayList<>();
+
+        try {
+            if (startFloor == destinationFloor) {
+                floors.add(startFloor);
+            }
+            if (startFloor < destinationFloor) {
+                for (int i = startFloor; i <= destinationFloor; i++) {
+                    floors.add(i);
+                }
+            }
+            if (destinationFloor < startFloor) {
+                for (int i = startFloor; i >= destinationFloor; i--) {
+                    floors.add(destinationFloor);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG + "error getting floors within building", String.valueOf(e));
+        }
+        return floors;
     }
 
     //Integer to String for floors
@@ -325,29 +365,7 @@ public class RouteCalculator {
         return currentFloor;
     }
 
-    //Get the floors which have to be used within a building in respective order
-    private ArrayList<Integer> getFloorsToUseWithinBuilding(int startFloor, int destinationFloor) {
-
-        ArrayList<Integer> floors = new ArrayList<>();
-        if (startFloor == destinationFloor) {
-            floors.add(startFloor);
-        }
-        if (startFloor < destinationFloor) {
-            for (int i = startFloor; i <= destinationFloor; i++) {
-                floors.add(i);
-            }
-        }
-        if (destinationFloor < startFloor) {
-            for (int i = startFloor; i >= destinationFloor; i--) {
-                floors.add(destinationFloor);
-            }
-        }
-        return floors;
-    }
-
-
     //Build walkability grid for a floor plan
-    @SuppressLint("LongLogTag")
     private ArrayList<ArrayList<Cell>> buildGrid(String building, String floor) {
         ArrayList<ArrayList<Cell>> grid = new ArrayList<>();
 
@@ -378,7 +396,7 @@ public class RouteCalculator {
                 }
             }
         } catch (Exception e) {
-            Log.e("Error getting the floor grid", String.valueOf(e));
+            Log.e(TAG + "error building the floor grid", String.valueOf(e));
         }
         return grid;
     }

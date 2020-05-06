@@ -1,6 +1,5 @@
 package de.eahjena.wi.campusnavigationeahjena.controls;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
@@ -26,7 +25,7 @@ public class JSONHandler {
     }
 
     //Read JSON from assets
-    public String readJsonFromAssets(Context context, String jsonFile) throws IOException {
+    public String readJsonFromAssets(Context context, String jsonFile) {
 
         AssetManager assetManager = context.getAssets();
         String json = null;
@@ -40,14 +39,13 @@ public class JSONHandler {
             json = new String(buffer, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            Log.e("Error reading JSON file", String.valueOf(e));
+            Log.e(TAG + "error reading JSON file", String.valueOf(e));
         }
 
         return json;
     }
 
     //Parse JSON to rooms ArrayList<Cell>
-    @SuppressLint("LongLogTag")
     public ArrayList<Room> parseJsonRooms(String json) {
         ArrayList<Room> rooms = new ArrayList<>();
 
@@ -75,14 +73,13 @@ public class JSONHandler {
                 rooms.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON rooms", String.valueOf(e));
+            Log.e(TAG + "error parsing JSON rooms", String.valueOf(e));
         }
 
         return rooms;
     }
 
     //Parse JSON to walkableCells ArrayList<Cell>
-    @SuppressLint("LongLogTag")
     ArrayList<Cell> parseJsonWalkableCells(String json) {
         ArrayList<Cell> walkableCells = new ArrayList<>();
 
@@ -99,14 +96,13 @@ public class JSONHandler {
                 walkableCells.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON walkableCells", String.valueOf(e));
+            Log.e(TAG + "error parsing JSON walkableCells", String.valueOf(e));
         }
 
         return walkableCells;
     }
 
     //Parse JSON to transitions ArrayList<Cell>
-    @SuppressLint("LongLogTag")
     public ArrayList<Transition> parseJsonTransitions(String json) {
         ArrayList<Transition> transitions = new ArrayList<>();
 
@@ -139,7 +135,7 @@ public class JSONHandler {
                 transitions.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON transitions array", String.valueOf(e));
+            Log.e(TAG + "error parsing JSON transitions array", String.valueOf(e));
         }
         return transitions;
     }

@@ -1,6 +1,5 @@
 package de.eahjena.wi.campusnavigationeahjena.controls;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ class AStarAlgorithm {
     private Cell startCell;
     private Cell endCell;
     private ArrayList<ArrayList<Cell>> grid;
-    private int costPerCell;
 
     //Constructor
     AStarAlgorithm(Cell startCell, Cell endCell, ArrayList<ArrayList<Cell>> grid) {
@@ -36,7 +34,6 @@ class AStarAlgorithm {
     }
 
     //Calculation of cells to walk on one grid
-    @SuppressLint("LongLogTag")
     ArrayList<Cell> getNavigationCellsOnGrid() {
 
         ArrayList<Cell> navigationCells = new ArrayList<>();
@@ -65,7 +62,7 @@ class AStarAlgorithm {
                 }
             }
         } catch (Exception e) {
-            Log.e("Error calculating route " + TAG, String.valueOf(e));
+            Log.e(TAG + "error calculating route ", String.valueOf(e));
         }
         return navigationCells;
     }
@@ -76,7 +73,7 @@ class AStarAlgorithm {
 
             Cell currentCell = open.poll();
 
-            if (currentCell.getWalkability()) {
+            if (currentCell != null && currentCell.getWalkability()) {
                 closed[currentCell.getXCoordinate()][currentCell.getYCoordinate()] = true;
 
                 if (!currentCell.equals(endCell)) {
@@ -86,29 +83,29 @@ class AStarAlgorithm {
                     //Check left
                     if (currentCell.getXCoordinate() - 1 >= 0) {
                         testCell = grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate());
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
+                        setCostPerCell(currentCell, testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + currentCell.getHeuristicCost());
                     }
 
                     //Check right
                     if (currentCell.getXCoordinate() + 1 < grid.size()) {
                         testCell = grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate());
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
+                        setCostPerCell(currentCell, testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + currentCell.getHeuristicCost());
                     }
 
                     //Check below
                     if (currentCell.getYCoordinate() - 1 >= 0) {
                         testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() - 1);
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
+                        setCostPerCell(currentCell, testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + currentCell.getHeuristicCost());
                     }
 
                     //Check above
                     if (currentCell.getYCoordinate() + 1 < grid.get(0).size()) {
                         testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() + 1);
-                        setCostPerCell(testCell);
-                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
+                        setCostPerCell(currentCell, testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + currentCell.getHeuristicCost());
                     }
                 }
             }
@@ -134,7 +131,7 @@ class AStarAlgorithm {
     }
 
     //Set cost of the cell to check
-    private void setCostPerCell(Cell test) {
+    private void setCostPerCell(Cell current, Cell test) {
         Class<? extends Cell> aClass = test.getClass();
 
         Cell compareCellClass = new Cell();
@@ -142,13 +139,13 @@ class AStarAlgorithm {
         Transition compareTransitionClass = new Transition();
 
         if (aClass.equals(compareCellClass.getClass())) {
-            costPerCell = COSTS_CELL;
+            current.setHeuristicCost(COSTS_CELL);
         }
         if (aClass.equals(compareRoomClass.getClass())) {
-            costPerCell = COSTS_ROOM;
+            current.setHeuristicCost(COSTS_ROOM);
         }
         if (aClass.equals(compareTransitionClass.getClass())) {
-            costPerCell = COSTS_TRANSITION;
+            current.setHeuristicCost(COSTS_TRANSITION);
         }
     }
 }

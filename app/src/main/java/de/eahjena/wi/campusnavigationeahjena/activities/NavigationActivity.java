@@ -68,7 +68,6 @@ public class NavigationActivity extends AppCompatActivity {
     private ArrayList<Transition> transitions = new ArrayList<>();
     private ArrayList<Cell> cellsToWalk = new ArrayList<>();
 
-    @SuppressLint("LongLogTag")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +79,7 @@ public class NavigationActivity extends AppCompatActivity {
         final ArrayList<String> floorPlans = new ArrayList<>(getItemsSpinner());
 
         final Spinner floorPlansSpinner = findViewById(R.id.spinner_floor_plans);
-        ArrayAdapter<String> floorPlansAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, floorPlans);
+        ArrayAdapter<String> floorPlansAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, floorPlans);
         floorPlansSpinner.setAdapter(floorPlansAdapter);
         floorPlansSpinner.setSelection(0, false);
         floorPlansSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -93,7 +92,7 @@ public class NavigationActivity extends AppCompatActivity {
                         ArrayList<String> helperBuildingAndFloor = getBuildingAndFloor((String) item);
                         drawNavigation(helperBuildingAndFloor.get(0), helperBuildingAndFloor.get(1));
                     } catch (Exception e) {
-                        Log.e("Error change map", String.valueOf(e));
+                        Log.e(TAG + "error change map", String.valueOf(e));
                     }
                 }
             }
@@ -168,7 +167,6 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     //Get rooms, stairs, elevators and crossings from JSON
-    @SuppressLint("LongLogTag")
     private void getRoomsAndTransitions() {
         try {
             JSONHandler jsonHandler = new JSONHandler();
@@ -181,7 +179,7 @@ public class NavigationActivity extends AppCompatActivity {
             transitions = jsonHandler.parseJsonTransitions(json);
 
         } catch (IOException e) {
-            Log.e("Error reading or parsing JSON files", String.valueOf(e));
+            Log.e(TAG + "error reading or parsing JSON files", String.valueOf(e));
         }
     }
 
@@ -196,12 +194,11 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (
                 Exception e) {
-            Log.e("QR-Code invalid", String.valueOf(e));
+            Log.e(TAG + "QR-Code invalid", String.valueOf(e));
         }
     }
 
     //Get destination location room
-    @SuppressLint("LongLogTag")
     private void getDestinationLocation() {
 
         try {
@@ -212,19 +209,18 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e("Error getting destination location room", String.valueOf(e));
+            Log.e(TAG + "error getting destination location room", String.valueOf(e));
         }
 
     }
 
     //Calculate route (get ArrayList<Cell> of cells to walk through buildings and floors)
-    @SuppressLint("LongLogTag")
     private void getRoute() {
         try {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
             cellsToWalk.addAll(routeCalculator.getNavigationCells());
         } catch (Exception e) {
-            Log.e("Error calculating route " + TAG, String.valueOf(e));
+            Log.e(TAG + "error calculating route ", String.valueOf(e));
         }
     }
 
@@ -232,12 +228,12 @@ public class NavigationActivity extends AppCompatActivity {
     private void drawNavigation(String building, String floor) {
 
         //Constraint layouts to add views to
-        ConstraintLayout constraintLayoutFloorPlan = findViewById(R.id.navigation_placeholder);
+        @SuppressLint("CutPasteId") ConstraintLayout constraintLayoutFloorPlan = findViewById(R.id.navigation_placeholder);
         ConstraintLayout.LayoutParams layoutParamsFloorPlan = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
 
-        ConstraintLayout constraintLayoutIcons = findViewById(R.id.navigation_placeholder);
+        @SuppressLint("CutPasteId") ConstraintLayout constraintLayoutIcons = findViewById(R.id.navigation_placeholder);
         ConstraintLayout.LayoutParams layoutParamsIcons = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -254,10 +250,12 @@ public class NavigationActivity extends AppCompatActivity {
         try {
             ImageView floorPlan = new ImageView(this);
             floorPlan.setImageResource(getResources().getIdentifier("drawable/" + getFloorPlan(building, floor), null, getPackageName()));
-            constraintLayoutFloorPlan.addView(floorPlan, layoutParamsFloorPlan);
+            if (constraintLayoutFloorPlan != null) {
+                constraintLayoutFloorPlan.addView(floorPlan, layoutParamsFloorPlan);
+            }
 
         } catch (Exception e) {
-            Log.e("Error drawing floor plan", String.valueOf(e));
+            Log.e(TAG + "error drawing floor plan", String.valueOf(e));
         }
 
         //Add own location room icon to Overlay
@@ -267,10 +265,12 @@ public class NavigationActivity extends AppCompatActivity {
                 startIcon.setImageResource(R.drawable.start_icon);
                 startIcon.setX(startLocation.getXCoordinate() * X_SCALING);
                 startIcon.setY(startLocation.getYCoordinate() * Y_SCALING);
-                constraintLayoutIcons.addView(startIcon, layoutParamsIcons);
+                if (constraintLayoutIcons != null) {
+                    constraintLayoutIcons.addView(startIcon, layoutParamsIcons);
+                }
             }
         } catch (Exception e) {
-            Log.e("Error drawing own location room", String.valueOf(e));
+            Log.e(TAG + "error drawing own location room", String.valueOf(e));
         }
 
         //Add destination location room icon to ConstraintLayout
@@ -280,10 +280,12 @@ public class NavigationActivity extends AppCompatActivity {
                 destinationIcon.setImageResource(R.drawable.destination_icon);
                 destinationIcon.setX(destinationLocation.getXCoordinate() * X_SCALING);
                 destinationIcon.setY(destinationLocation.getYCoordinate() * Y_SCALING);
-                constraintLayoutIcons.addView(destinationIcon, layoutParamsIcons);
+                if (constraintLayoutIcons != null) {
+                    constraintLayoutIcons.addView(destinationIcon, layoutParamsIcons);
+                }
             }
         } catch (Exception e) {
-            Log.e("Error drawing destination location room", String.valueOf(e));
+            Log.e(TAG + "error drawing destination location room", String.valueOf(e));
         }
 
         //Add transitions icons to ConstraintLayout
@@ -299,7 +301,9 @@ public class NavigationActivity extends AppCompatActivity {
                             stairIcon.setImageResource(R.drawable.stair_icon);
                             stairIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
                             stairIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
-                            constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
+                            if (constraintLayoutIcons != null) {
+                                constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
+                            }
                         }
                         if (transitions.get(i).getTypeOfTransition().equals("elevator")) {
 
@@ -307,7 +311,9 @@ public class NavigationActivity extends AppCompatActivity {
                             elevatorIcon.setImageResource(R.drawable.elevator_icon);
                             elevatorIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
                             elevatorIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
-                            constraintLayoutIcons.addView(elevatorIcon, layoutParamsIcons);
+                            if (constraintLayoutIcons != null) {
+                                constraintLayoutIcons.addView(elevatorIcon, layoutParamsIcons);
+                            }
                         }
                         if (transitions.get(i).getTypeOfTransition().equals("crossing")) {
 
@@ -315,13 +321,15 @@ public class NavigationActivity extends AppCompatActivity {
                             crossingIcon.setImageResource(R.drawable.crossing_icon);
                             crossingIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
                             crossingIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
-                            constraintLayoutIcons.addView(crossingIcon, layoutParamsIcons);
+                            if (constraintLayoutIcons != null) {
+                                constraintLayoutIcons.addView(crossingIcon, layoutParamsIcons);
+                            }
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e("Error drawing transitions", String.valueOf(e));
+            Log.e(TAG + "error drawing transitions", String.valueOf(e));
         }
 
         //Add route path to ConstraintLayout
@@ -334,12 +342,14 @@ public class NavigationActivity extends AppCompatActivity {
                         pathCellIcon.setImageResource(R.drawable.path_cell_icon);
                         pathCellIcon.setX(cellsToWalk.get(j).getXCoordinate() * X_SCALING);
                         pathCellIcon.setY(cellsToWalk.get(j).getYCoordinate() * Y_SCALING);
-                        constraintLayoutIcons.addView(pathCellIcon, layoutParamsIcons);
+                        if (constraintLayoutIcons != null) {
+                            constraintLayoutIcons.addView(pathCellIcon, layoutParamsIcons);
+                        }
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e("Error drawing route", String.valueOf(e));
+            Log.e(TAG + "error drawing route", String.valueOf(e));
         }
     }
 
@@ -419,7 +429,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         ArrayList<String> helperBuildingAndFloor = new ArrayList<>();
 
-        Locale currentLocale = getResources().getConfiguration().locale;
+        Locale currentLocale = getResources().getConfiguration().getLocales().get(0);
 
         if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_ug))) {
             helperBuildingAndFloor.add("03");

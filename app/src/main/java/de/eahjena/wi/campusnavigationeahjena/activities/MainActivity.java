@@ -1,6 +1,5 @@
 package de.eahjena.wi.campusnavigationeahjena.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -33,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Variables
     private String destinationQRCode;
 
-    @SuppressLint("LongLogTag")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             json = jsonHandler.readJsonFromAssets(this, JSON_FILE_ROOMS);
             rooms = jsonHandler.parseJsonRooms(json);
         } catch (IOException e) {
-            Log.e("Error reading or parsing JSON file", String.valueOf(e));
+            Log.e(TAG + "error reading or parsing JSON file", String.valueOf(e));
         }
 
         //Get lists of room names and persons for spinners
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         } catch (Exception e) {
-            Log.e("Error creating lists for spinners", String.valueOf(e));
+            Log.e(TAG + "error creating lists for spinners", String.valueOf(e));
         }
 
         final ArrayList<Room> finalRooms = rooms;
@@ -98,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
-                        Log.e("ScannerActivity Intend Exception", String.valueOf(e));
+                        Log.e(TAG + "intend exception", String.valueOf(e));
                     }
                 }
             }
@@ -132,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
-                        Log.e("ScannerActivity Intend Exception", String.valueOf(e));
+                        Log.e(TAG + "intend exception", String.valueOf(e));
                     }
                 }
             }
@@ -149,23 +147,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    @SuppressLint("LongLogTag")
     @Override
     public void onClick (View view){
 
-        switch (view.getId()) {
-            case R.id.button_location:
-                destinationQRCode = JUST_LOCATION;
-                break;
-            default:
-                break;
+        if (view.getId() == R.id.button_location) {
+            destinationQRCode = JUST_LOCATION;
         }
         try {
             Intent intentScannerActivity = new Intent(this, ScannerActivity.class);
             intentScannerActivity.putExtra("destinationLocation", destinationQRCode);
             startActivity(intentScannerActivity);
         } catch (Exception e) {
-            Log.e("ScannerActivity Intend Exception", String.valueOf(e));
+            Log.e(TAG + "intend exception", String.valueOf(e));
         }
     }
 }

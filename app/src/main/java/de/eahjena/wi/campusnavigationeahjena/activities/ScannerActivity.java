@@ -74,7 +74,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
             intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
             startActivity(intentNavigationActivity);
         } catch (Exception e) {
-            Log.e("NavigationActivity Intend Exception", String.valueOf(e));
+            Log.e(TAG + "intend exception", String.valueOf(e));
         }
     }
 }
