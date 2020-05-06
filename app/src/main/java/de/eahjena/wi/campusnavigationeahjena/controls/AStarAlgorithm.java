@@ -26,7 +26,6 @@ class AStarAlgorithm {
     private Cell startCell;
     private Cell endCell;
     private ArrayList<ArrayList<Cell>> grid;
-    private boolean keepCalculating = true;
     private int costPerCell;
 
     //Constructor
@@ -44,7 +43,7 @@ class AStarAlgorithm {
 
         try {
             //Set priority queue with comparator
-            open = new PriorityQueue<>(4, new Comparator<Cell>() {
+            open = new PriorityQueue<>(16, new Comparator<Cell>() {
                 @Override
                 public int compare(Cell cellOne, Cell cellTwo) {
                     return Integer.compare(cellOne.getFinalCost(), cellTwo.getFinalCost());
@@ -54,22 +53,16 @@ class AStarAlgorithm {
             //Set startCell for priority queue, set size of closed array and run A* algorithm
             open.add(startCell);
             closed = new boolean[grid.size()][grid.get(0).size()];
-            aStar(); //TODO: FIX: trace back returns null, no parent, updateAndCheckCosts parent available ???
-
-            Log.i("_____TEST_Star_01_01_____", String.valueOf(grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate()).getParent()));
-            Log.i("_____TEST_Star_01_02_____", String.valueOf(endCell.getXCoordinate()));
-            Log.i("_____TEST_Star_01_03_____", String.valueOf(endCell.getYCoordinate()));
-            Log.i("_____TEST_Star_01_04_____", String.valueOf(grid.size()));
-            Log.i("_____TEST_Star_01_05_____", String.valueOf(grid.get(6).get(7)));
+            aStar();
 
             //Trace back path
-            Cell current = grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate());
-            Log.i("_____TEST_Star_02_____", String.valueOf(current.getParent()));
+            if (closed[endCell.getXCoordinate()][endCell.getYCoordinate()]) {
+                Cell current = grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate());
 
-            while (current.getParent() != null) {
-                navigationCells.add(current);
-                Log.i("_____TEST_Star_03_____", String.valueOf(navigationCells.size()));
-                current = current.getParent();
+                while (current.getParent() != null) {
+                    navigationCells.add(current);
+                    current = current.getParent();
+                }
             }
         } catch (Exception e) {
             Log.e("Error calculating route " + TAG, String.valueOf(e));
@@ -79,41 +72,45 @@ class AStarAlgorithm {
 
     //A* algorithm
     private void aStar() {
-        while (keepCalculating) {
+        while (!open.isEmpty()) {
 
             Cell currentCell = open.poll();
 
-            if (currentCell != null && currentCell.getWalkability()) {
+            if (currentCell.getWalkability()) {
                 closed[currentCell.getXCoordinate()][currentCell.getYCoordinate()] = true;
 
-                if (currentCell.getXCoordinate() != endCell.getXCoordinate() && currentCell.getYCoordinate() != endCell.getYCoordinate()) {
+                if (!currentCell.equals(endCell)) {
+
+                    Cell testCell;
 
                     //Check left
                     if (currentCell.getXCoordinate() - 1 >= 0) {
-                        setCostPerCell(grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate()));
-                        checkAndUpdateCost(currentCell, grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate()), currentCell.getFinalCost() + costPerCell);
+                        testCell = grid.get(currentCell.getXCoordinate() - 1).get(currentCell.getYCoordinate());
+                        setCostPerCell(testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
                     }
 
                     //Check right
                     if (currentCell.getXCoordinate() + 1 < grid.size()) {
-                        setCostPerCell(grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate()));
-                        checkAndUpdateCost(currentCell, grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate()), currentCell.getFinalCost() + costPerCell);
+                        testCell = grid.get(currentCell.getXCoordinate() + 1).get(currentCell.getYCoordinate());
+                        setCostPerCell(testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
                     }
 
                     //Check below
                     if (currentCell.getYCoordinate() - 1 >= 0) {
-                        setCostPerCell(grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() - 1));
-                        checkAndUpdateCost(currentCell, grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() - 1), currentCell.getFinalCost() + costPerCell);
+                        testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() - 1);
+                        setCostPerCell(testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
                     }
 
                     //Check above
                     if (currentCell.getYCoordinate() + 1 < grid.get(0).size()) {
-                        setCostPerCell(grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() + 1));
-                        checkAndUpdateCost(currentCell, grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() + 1), currentCell.getFinalCost() + costPerCell);
+                        testCell = grid.get(currentCell.getXCoordinate()).get(currentCell.getYCoordinate() + 1);
+                        setCostPerCell(testCell);
+                        checkAndUpdateCost(currentCell, testCell, currentCell.getFinalCost() + costPerCell);
                     }
                 }
-            } else {
-                keepCalculating = false;
             }
         }
     }
@@ -128,7 +125,6 @@ class AStarAlgorithm {
             if (!inOpen || testFinalCost < test.getFinalCost()) {
                 test.setFinalCost(cost);
                 test.setParent(current);
-                Log.i("_____TEST_Star_00_____", String.valueOf(test.getParent()));
 
                 if (!inOpen) {
                     open.add(test);

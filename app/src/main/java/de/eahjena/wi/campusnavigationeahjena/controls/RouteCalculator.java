@@ -45,7 +45,6 @@ public class RouteCalculator {
     private Cell startLocation;
     private Cell destinationLocation;
 
-    private ArrayList<ArrayList<ArrayList<Cell>>> grids = new ArrayList<>();
     private ArrayList<Cell> cellsToWalk = new ArrayList<>();
 
     //Constructor
@@ -61,26 +60,27 @@ public class RouteCalculator {
 
         Cell startCell = startLocation;
         Cell endCell = new Cell();
+        Transition endCellTransition = new Transition();
 
-        grids = navigationBuildings();
+        ArrayList<ArrayList<ArrayList<Cell>>> grids = navigationBuildings();
 
         for (int index = 0; index < grids.size(); index++) {
 
             //Set endCell
-            if (startCell.getBuilding() == destinationLocation.getBuilding()
-                    && startCell.getFloor() == destinationLocation.getFloor()) {
+            if (startCell.getBuilding().equals(destinationLocation.getBuilding())
+                    && startCell.getFloor().equals(destinationLocation.getFloor())) {
 
                 endCell = destinationLocation;
             }
-            if (startCell.getBuilding() != destinationLocation.getBuilding()
-                    && startCell.getFloor() != destinationLocation.getFloor()) {
+            if (!startCell.getBuilding().equals(destinationLocation.getBuilding())
+                    && !startCell.getFloor().equals(destinationLocation.getFloor())) {
 
                 ArrayList<Transition> reachableTransitions = new ArrayList<>();
 
                 //get all reachable transitions
                 for (int j = 0; j < transitions.size(); j++) {
-                    if (transitions.get(j).getBuilding() == startCell.getBuilding()
-                            && transitions.get(j).getFloor() == startCell.getFloor()) {
+                    if (transitions.get(j).getBuilding().equals(startCell.getBuilding())
+                            && transitions.get(j).getFloor().equals(startCell.getFloor())) {
 
                         reachableTransitions.add(transitions.get(j));
                     }
@@ -106,16 +106,13 @@ public class RouteCalculator {
                         }
                     });
 
-                    endCell = transitions.get(0);
+                    endCellTransition = transitions.get(0);
                 }
             }
 
             //Get path through floor
             AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
-            Log.i("_____TEST_CAL_01_01_____", String.valueOf(cellsToWalk.size()));
-            Log.i("_____TEST_CAL_01_02_____", String.valueOf(endCell.getXCoordinate()));
             cellsToWalk.addAll(aStarAlgorithm.getNavigationCellsOnGrid());
-            Log.i("_____TEST_CAL_02_____", String.valueOf(cellsToWalk.size()));
 
             //Set next startCell
             if (endCell == destinationLocation) {
@@ -124,12 +121,17 @@ public class RouteCalculator {
             }
             if (endCell != destinationLocation) {
 
-                //TODO: what if not vertical transition? -> X and Y coordinates wrong
                 startCell.setBuilding(grids.get(index + 1).get(0).get(0).getBuilding());
                 startCell.setFloor(grids.get(index + 1).get(0).get(0).getFloor());
-                startCell.setXCoordinate(endCell.getXCoordinate());
-                startCell.setYCoordinate(endCell.getYCoordinate());
 
+                for (int i = 0; i < endCellTransition.getConnectedCells().size(); i++) {
+                    if (endCellTransition.getConnectedCells().get(i).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                            && endCellTransition.getConnectedCells().get(i).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
+
+                        startCell.setXCoordinate(endCellTransition.getConnectedCells().get(i).getXCoordinate());
+                        startCell.setYCoordinate(endCellTransition.getConnectedCells().get(i).getYCoordinate());
+                    }
+                }
             }
         }
         return cellsToWalk;
@@ -355,7 +357,7 @@ public class RouteCalculator {
 
             //Get floor plan JSON from assets
             json = jsonHandler.readJsonFromAssets(context,getFloorPlan(building, floor) + JSON);
-            ArrayList<Cell> walkableCells = jsonHandler.parseJsonGrid(json);
+            ArrayList<Cell> walkableCells = jsonHandler.parseJsonWalkableCells(json);
 
             for (int x = 0; x < GRID_X; x++) {
                 grid.add(new ArrayList<Cell>());

@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -56,8 +55,8 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
-    private static final int X_SCALING = 50; //TODO: scaling after mapping JSONs
-    private static final int Y_SCALING = 60; //TODO: scaling after mapping JSONs
+    private static final int X_SCALING = 10; //TODO: scaling after mapping JSONs
+    private static final int Y_SCALING = 12; //TODO: scaling after mapping JSONs
 
     //Variables
     private String destinationQRCode;
@@ -78,8 +77,7 @@ public class NavigationActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Spinner select floor plans
-        final ArrayList<String> floorPlans = new ArrayList<>();
-        floorPlans.addAll(getItemsSpinner());
+        final ArrayList<String> floorPlans = new ArrayList<>(getItemsSpinner());
 
         final Spinner floorPlansSpinner = findViewById(R.id.spinner_floor_plans);
         ArrayAdapter<String> floorPlansAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, floorPlans);
@@ -224,9 +222,7 @@ public class NavigationActivity extends AppCompatActivity {
     private void getRoute() {
         try {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
-            Log.i("_____TEST_NAV_01_____", String.valueOf(cellsToWalk.size()));
-            cellsToWalk.addAll(routeCalculator.getNavigationCells()); //TODO: FIX: E/Error calculating route NavigationActivity: java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
-            Log.i("_____TEST_NAV_02_____", String.valueOf(cellsToWalk.size()));
+            cellsToWalk.addAll(routeCalculator.getNavigationCells());
         } catch (Exception e) {
             Log.e("Error calculating route " + TAG, String.valueOf(e));
         }
@@ -291,32 +287,36 @@ public class NavigationActivity extends AppCompatActivity {
         }
 
         //Add transitions icons to ConstraintLayout
-        try {
+            try {
             for (int i = 0; i < transitions.size(); i++) {
-                if (transitions.get(i).getReachableBuildings().contains(building) && transitions.get(i).getReachableFloors().contains(floor)) {
-                    if (transitions.get(i).getTypeOfTransition().equals("stair")) {
+                for (int j = 0; j < transitions.get(i).getConnectedCells().size(); j++) {
+                    if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(building)
+                            && transitions.get(i).getConnectedCells().get(j).getFloor().equals(floor)) {
 
-                        ImageView stairIcon = new ImageView(this);
-                        stairIcon.setImageResource(R.drawable.stair_icon);
-                        stairIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
-                        stairIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
-                        constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
-                    }
-                    if (transitions.get(i).getTypeOfTransition().equals("elevator")) {
+                        if (transitions.get(i).getTypeOfTransition().equals("stair")) {
 
-                        ImageView elevatorIcon = new ImageView(this);
-                        elevatorIcon.setImageResource(R.drawable.elevator_icon);
-                        elevatorIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
-                        elevatorIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
-                        constraintLayoutIcons.addView(elevatorIcon, layoutParamsIcons);
-                    }
-                    if (transitions.get(i).getTypeOfTransition().equals("crossing")) {
+                            ImageView stairIcon = new ImageView(this);
+                            stairIcon.setImageResource(R.drawable.stair_icon);
+                            stairIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
+                            stairIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
+                            constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
+                        }
+                        if (transitions.get(i).getTypeOfTransition().equals("elevator")) {
 
-                        ImageView crossingIcon = new ImageView(this);
-                        crossingIcon.setImageResource(R.drawable.crossing_icon);
-                        crossingIcon.setX(transitions.get(i).getXCoordinate() * X_SCALING);
-                        crossingIcon.setY(transitions.get(i).getYCoordinate() * Y_SCALING);
-                        constraintLayoutIcons.addView(crossingIcon, layoutParamsIcons);
+                            ImageView elevatorIcon = new ImageView(this);
+                            elevatorIcon.setImageResource(R.drawable.elevator_icon);
+                            elevatorIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
+                            elevatorIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
+                            constraintLayoutIcons.addView(elevatorIcon, layoutParamsIcons);
+                        }
+                        if (transitions.get(i).getTypeOfTransition().equals("crossing")) {
+
+                            ImageView crossingIcon = new ImageView(this);
+                            crossingIcon.setImageResource(R.drawable.crossing_icon);
+                            crossingIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
+                            crossingIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
+                            constraintLayoutIcons.addView(crossingIcon, layoutParamsIcons);
+                        }
                     }
                 }
             }
@@ -328,7 +328,7 @@ public class NavigationActivity extends AppCompatActivity {
         try {
             if (!destinationQRCode.equals(JUST_LOCATION)) {
                 for (int j = 1; j < cellsToWalk.size(); j++) {
-                    if (cellsToWalk.get(j).getBuilding().equals(building) && cellsToWalk.get(j).getFloor().equals(floor)) { //TODO: crossings displayed on floors of start and end building in both buildings
+                    if (cellsToWalk.get(j).getBuilding().equals(building) && cellsToWalk.get(j).getFloor().equals(floor)) {
 
                         ImageView pathCellIcon = new ImageView(this);
                         pathCellIcon.setImageResource(R.drawable.path_cell_icon);
@@ -375,6 +375,7 @@ public class NavigationActivity extends AppCompatActivity {
                 break;
             case "01.04":
             case "02.04":
+            case "03.04":
                 floorPlan = BUILDING_03_02_01_FLOOR_04;
                 break;
             case "04.ug":

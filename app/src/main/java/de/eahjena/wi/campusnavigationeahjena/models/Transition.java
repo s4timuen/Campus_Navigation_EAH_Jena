@@ -19,11 +19,7 @@ public class Transition extends Cell{
         return typeOfTransition;
     }
 
-    public ArrayList<Cell> getReachableBuildings() {
-        return connectedCells;
-    }
-
-    public ArrayList<Cell> getReachableFloors() {
+    public ArrayList<Cell> getConnectedCells() {
         return connectedCells;
     }
 
@@ -32,11 +28,7 @@ public class Transition extends Cell{
         this.typeOfTransition = typeOfTransition;
     }
 
-    public void setReachableBuildings(ArrayList<Cell> connectedCells) {
-        this.connectedCells = connectedCells;
-    }
-
-    public void setReachableFloors(ArrayList<Cell> connectedCells) {
+    public void setConnectedCells(ArrayList<Cell> connectedCells) {
         this.connectedCells = connectedCells;
     }
 }

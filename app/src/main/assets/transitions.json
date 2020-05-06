@@ -5,32 +5,32 @@
             {
                 "building": "03",
                 "floor": "03",
-                "xCoordinate": 2,
-                "yCoordinate": 2
+                "xCoordinate": 3,
+                "yCoordinate": 5
             },
             {
                 "building": "03",
                 "floor": "02",
-                "xCoordinate": 2,
-                "yCoordinate": 2
+                "xCoordinate": 3,
+                "yCoordinate": 5
             },
             {
                 "building": "03",
                 "floor": "01",
-                "xCoordinate": 2,
-                "yCoordinate": 2
+                "xCoordinate": 3,
+                "yCoordinate": 5
             },
             {
                 "building": "03",
                 "floor": "00",
-                "xCoordinate": 2,
-                "yCoordinate": 2
+                "xCoordinate": 3,
+                "yCoordinate": 5
             },
             {
                 "building": "03",
                 "floor": "ug",
-                "xCoordinate": 2,
-                "yCoordinate": 2
+                "xCoordinate": 3,
+                "yCoordinate": 5
             }
         ],
         "walkable": true
@@ -83,8 +83,8 @@
             {
                 "building": "03",
                 "floor": "01",
-                "xCoordinate": 3,
-                "yCoordinate": 3
+                "xCoordinate": 6,
+                "yCoordinate": 6
             }
         ],
         "walkable": true
@@ -108,7 +108,7 @@
         "walkable": true
     },
     {
-    "type": "elevator",
+        "type": "elevator",
         "connectedCells": [
             {
                 "building": "04",
@@ -123,6 +123,6 @@
                 "yCoordinate": 2
             }
         ],
-    "walkable": true
-}
+        "walkable": true
+    }
 ]

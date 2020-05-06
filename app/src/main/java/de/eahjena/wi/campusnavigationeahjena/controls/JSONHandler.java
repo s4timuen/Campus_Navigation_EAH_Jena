@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import de.eahjena.wi.campusnavigationeahjena.models.Cell;
@@ -36,7 +37,7 @@ public class JSONHandler {
             byte[] buffer = new byte[size];
             inputStream.read(buffer);
             inputStream.close();
-            json = new String(buffer, "UTF-8");
+            json = new String(buffer, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             Log.e("Error reading JSON file", String.valueOf(e));
@@ -48,7 +49,7 @@ public class JSONHandler {
     //Parse JSON to rooms ArrayList<Cell>
     @SuppressLint("LongLogTag")
     public ArrayList<Room> parseJsonRooms(String json) {
-        ArrayList<Room> roomData = new ArrayList<>();
+        ArrayList<Room> rooms = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
@@ -56,7 +57,6 @@ public class JSONHandler {
                 Room entry = new Room();
 
                 JSONObject jEntry = jsonArray.getJSONObject(i);
-                entry.setId(jEntry.optInt("id"));
                 entry.setRoomNumber(jEntry.optString("roomNumber"));
                 entry.setBuilding(jEntry.optString("building"));
                 entry.setFloor(jEntry.optString("floor"));
@@ -68,23 +68,23 @@ public class JSONHandler {
                 JSONArray personsJSON = jEntry.getJSONArray("persons");
                 ArrayList<String> persons = new ArrayList<>();
                 for (int j = 0; j < personsJSON.length(); j++) {
-                    persons.add(personsJSON.getString(j));
+                    persons.add(personsJSON.optString(j));
                 }
                 entry.setPersons(persons);
 
-                roomData.add(entry);
+                rooms.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON rooms array", String.valueOf(e));
+            Log.e("Error parsing JSON rooms", String.valueOf(e));
         }
 
-        return roomData;
+        return rooms;
     }
 
     //Parse JSON to walkableCells ArrayList<Cell>
     @SuppressLint("LongLogTag")
-    public ArrayList<Cell> parseJsonGrid(String json) {
-        ArrayList<Cell> gridData = new ArrayList<>();
+    ArrayList<Cell> parseJsonWalkableCells(String json) {
+        ArrayList<Cell> walkableCells = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
@@ -96,53 +96,51 @@ public class JSONHandler {
                 entry.setYCoordinate(jEntry.optInt("yCoordinate"));
                 entry.setWalkability(jEntry.optBoolean("walkable"));
 
-                gridData.add(entry);
+                walkableCells.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON grid array", String.valueOf(e));
+            Log.e("Error parsing JSON walkableCells", String.valueOf(e));
         }
 
-        return gridData;
+        return walkableCells;
     }
 
-    //Parse JSON to stairs ArrayList<Cell>
+    //Parse JSON to transitions ArrayList<Cell>
     @SuppressLint("LongLogTag")
     public ArrayList<Transition> parseJsonTransitions(String json) {
-        ArrayList<Transition> transitionData = new ArrayList<>();
+        ArrayList<Transition> transitions = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
             for (int i = 0; i < jsonArray.length(); i++) {
-                Transition entry = new Transition();
 
+                Transition entry = new Transition();
                 JSONObject jEntry = jsonArray.getJSONObject(i);
-                entry.setId(jEntry.optInt("id"));
+
                 entry.setTypeOfTransition(jEntry.optString("type"));
-                entry.setXCoordinate(jEntry.optInt("xCoordinate"));
-                entry.setYCoordinate(jEntry.optInt("yCoordinate"));
                 entry.setWalkability(jEntry.optBoolean("walkable"));
 
-                JSONArray reachableFloors = jEntry.getJSONArray("reachableFloors");
-                ArrayList<String> floors = new ArrayList<>();
-                for (int j = 0; j < reachableFloors.length(); j++) {
-                    floors.add(reachableFloors.getString(j));
+                ArrayList<Cell> connectedCells = new ArrayList<>();
+                JSONArray connectedCellsJSON = jEntry.getJSONArray("connectedCells");
+                for (int j = 0; j < connectedCellsJSON.length(); j++) {
+
+                    JSONObject cellJSON = connectedCellsJSON.getJSONObject(j);
+                    Cell cell = new Cell();
+
+                    cell.setBuilding(cellJSON.optString("building"));
+                    cell.setFloor(cellJSON.optString("floor"));
+                    cell.setXCoordinate(cellJSON.optInt("xCoordinate"));
+                    cell.setYCoordinate(cellJSON.optInt("yCoordinate"));
+
+                    connectedCells.add(cell);
                 }
-                entry.setReachableFloors(floors);
+                entry.setConnectedCells(connectedCells);
 
-                JSONArray reachableBuildings = jEntry.getJSONArray("reachableBuildings");
-                ArrayList<String> buildings = new ArrayList<>();
-                for (int j = 0; j < reachableBuildings.length(); j++) {
-                    buildings.add(reachableBuildings.getString(j));
-                }
-                entry.setReachableBuildings(buildings);
-
-
-                transitionData.add(entry);
+                transitions.add(entry);
             }
         } catch (Exception e) {
-            Log.e("Error parsing JSON stairs array", String.valueOf(e));
+            Log.e("Error parsing JSON transitions array", String.valueOf(e));
         }
-
-        return transitionData;
+        return transitions;
     }
 }
