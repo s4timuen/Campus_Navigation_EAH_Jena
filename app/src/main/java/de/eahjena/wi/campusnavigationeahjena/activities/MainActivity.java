@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             json = jsonHandler.readJsonFromAssets(this, JSON_FILE_ROOMS);
             rooms = jsonHandler.parseJsonRooms(json);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG + "error reading or parsing JSON file", String.valueOf(e));
         }
 

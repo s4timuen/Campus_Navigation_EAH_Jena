@@ -14,6 +14,7 @@
         android:gravity="center"
         android:text="@string/text_view_by_room"
         android:textColor="@color/text_color"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
         android:textSize="@dimen/text_size"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/spinner_by_room" />
@@ -22,6 +23,7 @@
         android:id="@+id/spinner_by_room"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
         app:layout_constraintTop_toBottomOf="@id/text_view_by_room"
         app:layout_constraintBottom_toTopOf="@id/text_view_by_name" />
 
@@ -32,6 +34,7 @@
         android:gravity="center"
         android:text="@string/text_view_by_name"
         android:textColor="@color/text_color"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
         android:textSize="@dimen/text_size"
         app:layout_constraintTop_toBottomOf="@id/spinner_by_room"
         app:layout_constraintBottom_toTopOf="@id/spinner_by_person" />
@@ -40,8 +43,16 @@
         android:id="@+id/spinner_by_person"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
         app:layout_constraintTop_toBottomOf="@id/spinner_by_person"
-        app:layout_constraintBottom_toTopOf="@id/text_view_button_location" />
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_main_activity_one"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/guideline_main_activity_one" />
 
     <TextView
         android:id="@+id/text_view_button_location"
@@ -51,7 +62,8 @@
         android:text="@string/text_view_button_location"
         android:textColor="@color/text_color"
         android:textSize="@dimen/text_size"
-        app:layout_constraintTop_toBottomOf="@id/spinner_by_person"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
+        app:layout_constraintTop_toBottomOf="@id/guideline_main_activity_one"
         app:layout_constraintBottom_toTopOf="@id/button_location" />
 
     <Button
@@ -61,6 +73,8 @@
         android:text="@string/button_location"
         android:textColor="@color/text_color"
         android:textSize="@dimen/text_size"
+        android:layout_marginTop="@dimen/margin_top_main_activity"
+        android:layout_marginBottom="@dimen/margin_bottom_main_activity"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

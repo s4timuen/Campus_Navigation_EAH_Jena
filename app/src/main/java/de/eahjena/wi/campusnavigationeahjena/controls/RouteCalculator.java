@@ -34,7 +34,7 @@ public class RouteCalculator {
     private static final String BUILDING_05_FLOOR_03 = "building_05_floor_03";
 
     private static final int GRID_X = 40;
-    private static final int GRID_Y = 27;
+    private static final int GRID_Y = 30;
 
     private static final String JSON = ".json";
 

@@ -80,7 +80,7 @@ public class JSONHandler {
     }
 
     //Parse JSON to walkableCells ArrayList<Cell>
-    ArrayList<Cell> parseJsonWalkableCells(String json) {
+    public ArrayList<Cell> parseJsonWalkableCells(String json) {
         ArrayList<Cell> walkableCells = new ArrayList<>();
 
         try {
