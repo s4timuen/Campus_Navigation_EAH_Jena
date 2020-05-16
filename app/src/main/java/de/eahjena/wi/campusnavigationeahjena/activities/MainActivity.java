@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import de.eahjena.wi.campusnavigationeahjena.R;
@@ -33,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String destinationQRCode;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             json = jsonHandler.readJsonFromAssets(this, JSON_FILE_ROOMS);
             rooms = jsonHandler.parseJsonRooms(json);
         } catch (Exception e) {
-            Log.e(TAG + "error reading or parsing JSON file", String.valueOf(e));
+            Log.e(TAG + " error reading or parsing JSON file", String.valueOf(e));
         }
 
         //Get lists of room names and persons for spinners
@@ -66,15 +65,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 name = rooms.get(i).getRoomName();
                 roomNames.add(name);
 
-                for (int j = 0; j < rooms.get(i).getPersons().size(); j++) {
-                    String person;
-                    person = rooms.get(i).getPersons().get(j);
-                    persons.add(person);
+                if (!rooms.get(i).getPersons().isEmpty()) {
+                    for (int j = 0; j < rooms.get(i).getPersons().size(); j++) {
+                        String person;
+                        person = rooms.get(i).getPersons().get(j);
+                        persons.add(person);
+                    }
                 }
             }
-
         } catch (Exception e) {
-            Log.e(TAG + "error creating lists for spinners", String.valueOf(e));
+            Log.e(TAG + " error creating lists for spinners", String.valueOf(e));
         }
 
         final ArrayList<Room> finalRooms = rooms;
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
-                        Log.e(TAG + "intend exception", String.valueOf(e));
+                        Log.e(TAG + " intend exception", String.valueOf(e));
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        //Spinner fpr person search intents
+        //Spinner for person search intents
         Spinner searchByPerson = findViewById(R.id.spinner_by_person);
         ArrayAdapter<String> searchByPersonAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, persons);
         searchByPerson.setAdapter(searchByPersonAdapter);
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
-                        Log.e(TAG + "intend exception", String.valueOf(e));
+                        Log.e(TAG + " intend exception", String.valueOf(e));
                     }
                 }
             }
@@ -158,7 +158,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             intentScannerActivity.putExtra("destinationLocation", destinationQRCode);
             startActivity(intentScannerActivity);
         } catch (Exception e) {
-            Log.e(TAG + "intend exception", String.valueOf(e));
+            Log.e(TAG + " intend exception", String.valueOf(e));
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 }

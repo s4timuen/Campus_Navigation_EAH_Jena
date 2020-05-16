@@ -1,13 +1,11 @@
 package de.eahjena.wi.campusnavigationeahjena.activities;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.Result;
@@ -26,9 +24,8 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private boolean mAutoFocus = true;
     private String destinationQRCode;
 
-    @SuppressLint("LongLogTag")
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mScannerView = new ZXingScannerView(this);
         setContentView(mScannerView);
@@ -41,6 +38,21 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
         //Check necessary permissions
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
+        }
+    }
+
+    @Override
+    public void handleResult(Result rawResult) {
+        String rawResultAsString;
+        try {
+            rawResultAsString = rawResult.getText();
+            Log.i(TAG, rawResultAsString);
+            Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
+            intentNavigationActivity.putExtra("rawResultAsString", rawResultAsString);
+            intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
+            startActivity(intentNavigationActivity);
+        } catch (Exception e) {
+            Log.e(TAG + " intend exception", String.valueOf(e));
         }
     }
 
@@ -59,22 +71,6 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
         super.onPause();
         if(checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             mScannerView.stopCamera();
-        }
-    }
-
-    @SuppressLint("LongLogTag")
-    @Override
-    public void handleResult(Result rawResult) {
-        String rawResultAsString;
-        try {
-            rawResultAsString = rawResult.getText();
-            Log.i(TAG, rawResultAsString);
-            Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-            intentNavigationActivity.putExtra("rawResultAsString", rawResultAsString);
-            intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
-            startActivity(intentNavigationActivity);
-        } catch (Exception e) {
-            Log.e(TAG + "intend exception", String.valueOf(e));
         }
     }
 }

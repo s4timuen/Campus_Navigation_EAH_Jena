@@ -62,7 +62,7 @@ class AStarAlgorithm {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error calculating route ", String.valueOf(e));
+            Log.e(TAG + " error calculating route ", String.valueOf(e));
         }
         return navigationCells;
     }

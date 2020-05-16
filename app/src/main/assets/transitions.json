@@ -25,7 +25,8 @@
         "floor": "02",
         "xCoordinate": 21,
         "yCoordinate": 12
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 21,
@@ -95,7 +96,8 @@
         "floor": "02",
         "xCoordinate": 22,
         "yCoordinate": 11
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 22,
@@ -130,7 +132,8 @@
         "floor": "02",
         "xCoordinate": 33,
         "yCoordinate": 11
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 33,
@@ -165,7 +168,8 @@
         "floor": "02",
         "xCoordinate": 33,
         "yCoordinate": 10
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 33,
@@ -206,7 +210,8 @@
         "floor": "02",
         "xCoordinate": 9,
         "yCoordinate": 11
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 9,
@@ -229,7 +234,8 @@
         "floor": "02",
         "xCoordinate": 9,
         "yCoordinate": 10
-      },      {
+      },
+      {
         "building": "05",
         "floor": "03",
         "xCoordinate": 9,

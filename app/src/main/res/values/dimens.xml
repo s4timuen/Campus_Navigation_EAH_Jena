@@ -1,6 +1,7 @@
 <resources>
 
     <dimen name="text_size">20dp</dimen>
+    <dimen name="margin_spinner_navigation_top">50dp</dimen>
     <dimen name="margin_bottom_main_activity">50dp</dimen>
     <dimen name="margin_top_main_activity">20dp</dimen>
     <dimen name="guideline_main_activity_one">310dp</dimen>

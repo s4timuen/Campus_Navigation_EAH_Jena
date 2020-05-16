@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -52,8 +53,8 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
-    private static final int X_SCALING = 10; //TODO: scaling after mapping JSONs
-    private static final int Y_SCALING = 12; //TODO: scaling after mapping JSONs
+    private static final int X_SCALING = 27;
+    private static final int Y_SCALING = 27;
 
     //Variables
     private String destinationQRCode;
@@ -89,7 +90,7 @@ public class NavigationActivity extends AppCompatActivity {
                         ArrayList<String> helperBuildingAndFloor = getBuildingAndFloor((String) item);
                         drawNavigation(helperBuildingAndFloor.get(0), helperBuildingAndFloor.get(1));
                     } catch (Exception e) {
-                        Log.e(TAG + "error change map", String.valueOf(e));
+                        Log.e(TAG + " error changing map", String.valueOf(e));
                     }
                 }
             }
@@ -176,7 +177,7 @@ public class NavigationActivity extends AppCompatActivity {
             transitions = jsonHandler.parseJsonTransitions(json);
 
         } catch (Exception e) {
-            Log.e(TAG + "error reading or parsing JSON files", String.valueOf(e));
+            Log.e(TAG + " error reading or parsing JSON files", String.valueOf(e));
         }
     }
 
@@ -191,7 +192,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (
                 Exception e) {
-            Log.e(TAG + "QR-Code invalid", String.valueOf(e));
+            Log.e(TAG + " QR-Code invalid", String.valueOf(e));
         }
     }
 
@@ -205,7 +206,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error getting destination location room", String.valueOf(e));
+            Log.e(TAG + " error getting destination location room", String.valueOf(e));
         }
 
     }
@@ -216,7 +217,7 @@ public class NavigationActivity extends AppCompatActivity {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
             cellsToWalk.addAll(routeCalculator.getNavigationCells());
         } catch (Exception e) {
-            Log.e(TAG + "error calculating route ", String.valueOf(e));
+            Log.e(TAG + " error calculating route ", String.valueOf(e));
         }
     }
 
@@ -290,7 +291,7 @@ public class NavigationActivity extends AppCompatActivity {
                     floorPlan = null;
             }
         } catch (Exception e) {
-            Log.e(TAG + "error getting floor plan", String.valueOf(e));
+            Log.e(TAG + " error getting floor plan", String.valueOf(e));
         }
         return floorPlan;
     }
@@ -367,7 +368,7 @@ public class NavigationActivity extends AppCompatActivity {
                 helperBuildingAndFloor.add("03");
             }
         } catch (Exception e) {
-            Log.e(TAG + "error getting building and floor", String.valueOf(e));
+            Log.e(TAG + " error getting building and floor", String.valueOf(e));
         }
         return helperBuildingAndFloor;
     }
@@ -381,7 +382,7 @@ public class NavigationActivity extends AppCompatActivity {
             configuration.setLocale(currentLocale);
             localeString = this.createConfigurationContext(configuration).getString(floorPlan);
         } catch (Exception e) {
-            Log.e(TAG + "error getting locale", String.valueOf(e));
+            Log.e(TAG + " error getting locale", String.valueOf(e));
         }
         return localeString;
     }
@@ -419,7 +420,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG + "error drawing floor plan", String.valueOf(e));
+            Log.e(TAG + " error drawing floor plan", String.valueOf(e));
         }
 
         //Add own location room icon to Overlay
@@ -434,7 +435,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing own location room", String.valueOf(e));
+            Log.e(TAG + " error drawing own location room", String.valueOf(e));
         }
 
         //Add destination location room icon to ConstraintLayout
@@ -449,7 +450,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing destination location room", String.valueOf(e));
+            Log.e(TAG + " error drawing destination location room", String.valueOf(e));
         }
 
         //Add transitions icons to ConstraintLayout
@@ -493,7 +494,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing transitions", String.valueOf(e));
+            Log.e(TAG + " error drawing transitions", String.valueOf(e));
         }
 
         //Add route path to ConstraintLayout
@@ -513,7 +514,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing route", String.valueOf(e));
+            Log.e(TAG + " error drawing route", String.valueOf(e));
         }
     }
 
@@ -525,19 +526,37 @@ public class NavigationActivity extends AppCompatActivity {
      * Helper methods for manual mapping in JSON files
      */
 
+    //TODO: overlay layouts -> navigation_placeholder -> layout and add both other layouts ?
+    //TODO: transitions wrong scaling
+    //TODO: wrong start plan
+    //TODO: add to non helper draw method
+
     //Draw everything available, helper method for manual mapping of JSON files
     private void drawNavigation(String building, String floor) {
 
         //Constraint layouts to add views to
         @SuppressLint("CutPasteId") ConstraintLayout constraintLayoutFloorPlan = findViewById(R.id.navigation_placeholder);
+
         ConstraintLayout.LayoutParams layoutParamsFloorPlan = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
+
+        ConstraintSet constraintSetFloorPlan = new ConstraintSet();
+        constraintSetFloorPlan.clone(constraintLayoutFloorPlan);
+        constraintSetFloorPlan.connect(R.id.constraint_layout_floor_plan_id, ConstraintSet.TOP, R.id.navigation_placeholder, ConstraintSet.TOP);
+        constraintSetFloorPlan.connect(R.id.constraint_layout_floor_plan_id, ConstraintSet.START, R.id.navigation_placeholder, ConstraintSet.START);
+        constraintSetFloorPlan.applyTo(constraintLayoutFloorPlan);
 
         @SuppressLint("CutPasteId") ConstraintLayout constraintLayoutIcons = findViewById(R.id.navigation_placeholder);
         ConstraintLayout.LayoutParams layoutParamsIcons = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
+
+        ConstraintSet constraintSetIcons = new ConstraintSet();
+        constraintSetIcons.clone(constraintLayoutFloorPlan);
+        constraintSetIcons.connect(R.id.constraint_layout_icons_id, ConstraintSet.TOP, R.id.navigation_placeholder, ConstraintSet.TOP);
+        constraintSetIcons.connect(R.id.constraint_layout_icons_id, ConstraintSet.START, R.id.navigation_placeholder, ConstraintSet.START);
+        constraintSetIcons.applyTo(constraintLayoutFloorPlan);
 
         //Remove views from layouts before redraw
         if (constraintLayoutFloorPlan != null) {
@@ -556,7 +575,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-            Log.e(TAG + "error drawing floor plan", String.valueOf(e));
+            Log.e(TAG + " error drawing floor plan", String.valueOf(e));
         }
 
         //Add route path to ConstraintLayout
@@ -576,7 +595,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing route", String.valueOf(e));
+            Log.e(TAG + " error drawing route", String.valueOf(e));
         }
 
         //Add own location room icon to Overlay
@@ -591,7 +610,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing own location room", String.valueOf(e));
+            Log.e(TAG + " error drawing own location room", String.valueOf(e));
         }
 
         //Add destination location room icon to ConstraintLayout
@@ -606,7 +625,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing destination location room", String.valueOf(e));
+            Log.e(TAG + " error drawing destination location room", String.valueOf(e));
         }
 
         //Add transitions icons to ConstraintLayout
@@ -621,7 +640,9 @@ public class NavigationActivity extends AppCompatActivity {
                             ImageView stairIcon = new ImageView(this);
                             stairIcon.setImageResource(R.drawable.stair_icon);
                             stairIcon.setX(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * X_SCALING);
+                            Log.i("_____TEST_____", String.valueOf(transitions.get(i).getConnectedCells().get(j).getXCoordinate()));
                             stairIcon.setY(transitions.get(i).getConnectedCells().get(j).getXCoordinate() * Y_SCALING);
+                            Log.i("_____TEST_____", String.valueOf(transitions.get(i).getConnectedCells().get(j).getYCoordinate()));
                             if (constraintLayoutIcons != null) {
                                 constraintLayoutIcons.addView(stairIcon, layoutParamsIcons);
                             }
@@ -650,7 +671,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error drawing transitions", String.valueOf(e));
+            Log.e(TAG + " error drawing transitions", String.valueOf(e));
         }
     }
 
@@ -665,7 +686,7 @@ public class NavigationActivity extends AppCompatActivity {
             json = jsonHandler.readJsonFromAssets(this, getFloorPlan(building, floor) + ".json");
             walkableCells = jsonHandler.parseJsonWalkableCells(json);
         } catch (Exception e) {
-            Log.e(TAG + "error getting all walkable cells", String.valueOf(e));
+            Log.e(TAG + " error getting all walkable cells", String.valueOf(e));
         }
         return walkableCells;
     }

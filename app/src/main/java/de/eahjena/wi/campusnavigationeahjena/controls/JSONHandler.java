@@ -7,7 +7,6 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class JSONHandler {
     public String readJsonFromAssets(Context context, String jsonFile) {
 
         AssetManager assetManager = context.getAssets();
-        String json = null;
+        String json = "";
 
         try {
             InputStream inputStream = assetManager.open(jsonFile);
@@ -39,7 +38,7 @@ public class JSONHandler {
             json = new String(buffer, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            Log.e(TAG + "error reading JSON file", String.valueOf(e));
+            Log.e(TAG + " error reading JSON file", String.valueOf(e));
         }
 
         return json;
@@ -73,33 +72,10 @@ public class JSONHandler {
                 rooms.add(entry);
             }
         } catch (Exception e) {
-            Log.e(TAG + "error parsing JSON rooms", String.valueOf(e));
+            Log.e(TAG + " error parsing JSON rooms", String.valueOf(e));
         }
 
         return rooms;
-    }
-
-    //Parse JSON to walkableCells ArrayList<Cell>
-    public ArrayList<Cell> parseJsonWalkableCells(String json) {
-        ArrayList<Cell> walkableCells = new ArrayList<>();
-
-        try {
-            JSONArray jsonArray = new JSONArray(json);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                Cell entry = new Cell();
-
-                JSONObject jEntry = jsonArray.getJSONObject(i);
-                entry.setXCoordinate(jEntry.optInt("xCoordinate"));
-                entry.setYCoordinate(jEntry.optInt("yCoordinate"));
-                entry.setWalkability(jEntry.optBoolean("walkable"));
-
-                walkableCells.add(entry);
-            }
-        } catch (Exception e) {
-            Log.e(TAG + "error parsing JSON walkableCells", String.valueOf(e));
-        }
-
-        return walkableCells;
     }
 
     //Parse JSON to transitions ArrayList<Cell>
@@ -135,8 +111,32 @@ public class JSONHandler {
                 transitions.add(entry);
             }
         } catch (Exception e) {
-            Log.e(TAG + "error parsing JSON transitions array", String.valueOf(e));
+            Log.e(TAG + " error parsing JSON transitions array", String.valueOf(e));
         }
         return transitions;
     }
+
+    //Parse JSON to walkableCells ArrayList<Cell>
+    public ArrayList<Cell> parseJsonWalkableCells(String json) {
+        ArrayList<Cell> walkableCells = new ArrayList<>();
+
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Cell entry = new Cell();
+
+                JSONObject jEntry = jsonArray.getJSONObject(i);
+                entry.setXCoordinate(jEntry.optInt("xCoordinate"));
+                entry.setYCoordinate(jEntry.optInt("yCoordinate"));
+                entry.setWalkability(jEntry.optBoolean("walkable"));
+
+                walkableCells.add(entry);
+            }
+        } catch (Exception e) {
+            Log.e(TAG + " error parsing JSON walkableCells", String.valueOf(e));
+        }
+
+        return walkableCells;
+    }
+
 }

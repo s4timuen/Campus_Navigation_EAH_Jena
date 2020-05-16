@@ -43,20 +43,6 @@ public class Cell {
         return floor;
     }
 
-    public int getXCoordinate() {
-        return xCoordinate;
-    }
-
-    public int getYCoordinate() {
-        return yCoordinate;
-    }
-
-    public Cell getParent() {
-        return parent;
-    }
-
-    public boolean getWalkability() {return walkable;}
-
     public int getBuildingAsInteger() {
 
         int buildingAsInteger = 0;
@@ -111,6 +97,20 @@ public class Cell {
         }
         return floorAsInteger;
     }
+
+    public int getXCoordinate() {
+        return xCoordinate;
+    }
+
+    public int getYCoordinate() {
+        return yCoordinate;
+    }
+
+    public Cell getParent() {
+        return parent;
+    }
+
+    public boolean getWalkability() {return walkable;}
 
     //Setter
     public void setHeuristicCost(int heuristicCost) {

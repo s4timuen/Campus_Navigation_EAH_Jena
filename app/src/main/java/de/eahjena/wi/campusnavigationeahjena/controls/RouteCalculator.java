@@ -143,7 +143,7 @@ public class RouteCalculator {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error getting navigation cells", String.valueOf(e));
+            Log.e(TAG + " error getting navigation cells", String.valueOf(e));
         }
         return cellsToWalk;
     }
@@ -305,7 +305,7 @@ public class RouteCalculator {
                  }
              }
          } catch (Exception e) {
-             Log.e(TAG + "error navigating through buildings", String.valueOf(e));
+             Log.e(TAG + " error navigating through buildings", String.valueOf(e));
          }
         return gridsToAdd;
     }
@@ -330,7 +330,7 @@ public class RouteCalculator {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error getting floors within building", String.valueOf(e));
+            Log.e(TAG + " error getting floors within building", String.valueOf(e));
         }
         return floors;
     }
@@ -396,7 +396,7 @@ public class RouteCalculator {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG + "error building the floor grid", String.valueOf(e));
+            Log.e(TAG + " error building the floor grid", String.valueOf(e));
         }
         return grid;
     }
