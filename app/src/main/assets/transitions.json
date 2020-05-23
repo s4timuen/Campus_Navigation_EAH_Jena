@@ -762,12 +762,6 @@
         "floor": "00",
         "xCoordinate": 34,
         "yCoordinate": 11
-      },
-      {
-        "building": "04",
-        "floor": "01",
-        "xCoordinate": 34,
-        "yCoordinate": 11
       }
     ],
     "walkable": true

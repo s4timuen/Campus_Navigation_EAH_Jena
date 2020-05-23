@@ -1,83 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <TextView
-        android:id="@+id/text_view_by_room"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/text_view_by_room"
-        android:textColor="@color/text_color"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        android:textSize="@dimen/text_size"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/spinner_by_room" />
+        android:layout_height="match_parent">
 
-    <Spinner
-        android:id="@+id/spinner_by_room"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        app:layout_constraintTop_toBottomOf="@id/text_view_by_room"
-        app:layout_constraintBottom_toTopOf="@id/text_view_by_name" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/text_view_by_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/text_view_by_name"
-        android:textColor="@color/text_color"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        android:textSize="@dimen/text_size"
-        app:layout_constraintTop_toBottomOf="@id/spinner_by_room"
-        app:layout_constraintBottom_toTopOf="@id/spinner_by_person" />
+            <TextView
+                android:id="@+id/text_view_by_room"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                android:gravity="center"
+                android:text="@string/text_view_by_room"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                app:layout_constraintBottom_toTopOf="@id/spinner_by_room"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/spinner_by_person"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        app:layout_constraintTop_toBottomOf="@id/spinner_by_person"
-        app:layout_constraintBottom_toBottomOf="parent" />
+            <Spinner
+                android:id="@+id/spinner_by_room"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                app:layout_constraintBottom_toTopOf="@id/text_view_by_name"
+                app:layout_constraintTop_toBottomOf="@id/text_view_by_room" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_main_activity_one"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/guideline_main_activity_one" />
+            <TextView
+                android:id="@+id/text_view_by_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                android:gravity="center"
+                android:text="@string/text_view_by_name"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                app:layout_constraintBottom_toTopOf="@id/spinner_by_person"
+                app:layout_constraintTop_toBottomOf="@id/spinner_by_room" />
 
-    <TextView
-        android:id="@+id/text_view_button_location"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/text_view_button_location"
-        android:textColor="@color/text_color"
-        android:textSize="@dimen/text_size"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        app:layout_constraintTop_toBottomOf="@id/guideline_main_activity_one"
-        app:layout_constraintBottom_toTopOf="@id/button_location" />
+            <Spinner
+                android:id="@+id/spinner_by_person"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/spinner_by_person" />
 
-    <Button
-        android:id="@+id/button_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_location"
-        android:textColor="@color/text_color"
-        android:textSize="@dimen/text_size"
-        android:layout_marginTop="@dimen/margin_top_main_activity"
-        android:layout_marginBottom="@dimen/margin_bottom_main_activity"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_view_button_location" />
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_main_activity_one"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="@dimen/guideline_main_activity_one" />
+
+            <TextView
+                android:id="@+id/text_view_button_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                android:gravity="center"
+                android:text="@string/text_view_button_location"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                app:layout_constraintBottom_toTopOf="@id/button_location_qr"
+                app:layout_constraintTop_toBottomOf="@id/guideline_main_activity_one" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_field_search_room_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_search_room"
+                app:errorEnabled="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_view_button_location"
+                app:layout_constraintBottom_toTopOf="@id/text_view_search_or_qr">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_field_search_room_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/button_location_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                android:layout_marginBottom="@dimen/margin_bottom_main_activity"
+                android:text="@string/button_location_text"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/button_location_qr"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/input_field_search_room_layout" />
+
+            <TextView
+                android:id="@+id/text_view_search_or_qr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_view_search_or_qr"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                android:layout_marginTop="@dimen/text_view_search_or_qr_margin_top"
+                app:layout_constraintEnd_toStartOf="@id/button_location_qr"
+                app:layout_constraintStart_toEndOf="@id/button_location_text"
+                app:layout_constraintTop_toBottomOf="@id/input_field_search_room_layout" />
+
+            <Button
+                android:id="@+id/button_location_qr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_main_activity"
+                android:layout_marginBottom="@dimen/margin_bottom_main_activity"
+                android:text="@string/button_location_qr"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/button_location_text"
+                app:layout_constraintTop_toBottomOf="@id/input_field_search_room_layout" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

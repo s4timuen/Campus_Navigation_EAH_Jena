@@ -23,32 +23,47 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private ZXingScannerView mScannerView;
     private boolean mAutoFocus = true;
     private String destinationQRCode;
+    String ownLocation;
+    boolean skipScanner;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mScannerView = new ZXingScannerView(this);
-        setContentView(mScannerView);
-        mScannerView.setAutoFocus(mAutoFocus);
 
         //get extra from parent
         Intent intendScannerActivity = getIntent();
         destinationQRCode = intendScannerActivity.getStringExtra("destinationQRCode");
+        ownLocation = intendScannerActivity.getStringExtra("ownLocation");
+        skipScanner = intendScannerActivity.getBooleanExtra("skipScanner", false);
 
-        //Check necessary permissions
-        if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
+        if (skipScanner) {
+            try {
+                Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
+                intentNavigationActivity.putExtra("ownLocation", ownLocation);
+                intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
+                startActivity(intentNavigationActivity);
+            } catch (Exception e) {
+                Log.e(TAG + " intend exception", String.valueOf(e));
+            }
+        }
+        if (!skipScanner) {
+            mScannerView = new ZXingScannerView(this);
+            setContentView(mScannerView);
+            mScannerView.setAutoFocus(mAutoFocus);
+
+            //Check necessary permissions
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA);
+            }
         }
     }
 
     @Override
     public void handleResult(Result rawResult) {
-        String rawResultAsString;
         try {
-            rawResultAsString = rawResult.getText();
-            Log.i(TAG, rawResultAsString);
+            ownLocation = rawResult.getText();
             Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-            intentNavigationActivity.putExtra("rawResultAsString", rawResultAsString);
+            intentNavigationActivity.putExtra("ownLocation", ownLocation);
             intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
             startActivity(intentNavigationActivity);
         } catch (Exception e) {
@@ -59,18 +74,22 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     @Override
     public void onResume() {
         super.onResume();
-        if(checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            mScannerView.setResultHandler(this);
-            mScannerView.startCamera();
-            mScannerView.setAutoFocus(mAutoFocus);
+        if (!skipScanner) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                mScannerView.setResultHandler(this);
+                mScannerView.startCamera();
+                mScannerView.setAutoFocus(mAutoFocus);
+            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            mScannerView.stopCamera();
+        if (!skipScanner) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                mScannerView.stopCamera();
+            }
         }
     }
 }

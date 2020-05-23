@@ -105,6 +105,16 @@
     "walkable": true
   },
   {
+    "xCoordinate": 27,
+    "yCoordinate": 11,
+    "walkable": true
+  },
+  {
+    "xCoordinate": 28,
+    "yCoordinate": 11,
+    "walkable": true
+  },
+  {
     "xCoordinate": 21,
     "yCoordinate": 11,
     "walkable": true
@@ -116,11 +126,6 @@
   },
   {
     "xCoordinate": 32,
-    "yCoordinate": 11,
-    "walkable": true
-  },
-  {
-    "xCoordinate": 34,
     "yCoordinate": 11,
     "walkable": true
   },

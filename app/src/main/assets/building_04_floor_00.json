@@ -701,17 +701,17 @@
   },
   {
     "xCoordinate": 31,
-    "yCoordinate": 17,
+    "yCoordinate": 14,
     "walkable": true
   },
   {
     "xCoordinate": 32,
-    "yCoordinate": 17,
+    "yCoordinate": 14,
     "walkable": true
   },
   {
     "xCoordinate": 34,
-    "yCoordinate": 17,
+    "yCoordinate": 14,
     "walkable": true
   },
   {
@@ -739,6 +739,7 @@
     "yCoordinate": 15,
     "walkable": true
   },
+
   {
     "xCoordinate": 9,
     "yCoordinate": 16,

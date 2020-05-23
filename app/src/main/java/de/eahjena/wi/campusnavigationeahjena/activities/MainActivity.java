@@ -8,13 +8,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.eahjena.wi.campusnavigationeahjena.R;
 import de.eahjena.wi.campusnavigationeahjena.controls.JSONHandler;
@@ -30,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //Variables
     private String destinationQRCode;
+    ArrayList<Room> rooms = new ArrayList<>();
+    TextInputLayout findOwnLocationLayoutText;
+    TextInputEditText findOwnLocationEditText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setSupportActionBar(toolbar);
 
         //Get lists of rooms and names for spinners
-        ArrayList<Room> rooms = new ArrayList<>();
         JSONHandler jsonHandler = new JSONHandler();
         String json;
 
@@ -79,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         final ArrayList<Room> finalRooms = rooms;
 
+        //TODO: sort by building
         //Spinner for room search intent
         final Spinner searchByRoom = findViewById(R.id.spinner_by_room);
         ArrayAdapter<String> searchByRoomAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, roomNames);
@@ -107,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        //TODO: sort by alphabet
         //Spinner for person search intents
         Spinner searchByPerson = findViewById(R.id.spinner_by_person);
         ArrayAdapter<String> searchByPersonAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, persons);
@@ -141,24 +152,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        //Find own location button
-        Button findOwnLocation = findViewById(R.id.button_location);
-        findOwnLocation.setOnClickListener(this);
+        //Find own location input field
+        findOwnLocationLayoutText = findViewById(R.id.input_field_search_room_layout);
+        findOwnLocationEditText = findViewById(R.id.input_field_search_room_edit);
+        findOwnLocationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    handleUserInputErrorAndIntent();
+                }
+                return false;
+            }
+        });
 
+
+        //Find own location button qr-code
+        Button findOwnLocationButtonQR = findViewById(R.id.button_location_qr);
+        findOwnLocationButtonQR.setOnClickListener(this);
+
+        //Find own location button text
+        Button findOwnLocationButtonText = findViewById(R.id.button_location_text);
+        findOwnLocationButtonText.setOnClickListener(this);
     }
 
     @Override
-    public void onClick (View view){
-
-        if (view.getId() == R.id.button_location) {
-            destinationQRCode = JUST_LOCATION;
-        }
+    public void onClick(View view) {
         try {
-            Intent intentScannerActivity = new Intent(this, ScannerActivity.class);
-            intentScannerActivity.putExtra("destinationLocation", destinationQRCode);
-            startActivity(intentScannerActivity);
+
+            //QR button
+            if (view.getId() == R.id.button_location_qr) {
+
+                //Intent
+                destinationQRCode = JUST_LOCATION;
+                Intent intentScannerActivity = new Intent(this, ScannerActivity.class);
+                intentScannerActivity.putExtra("destinationLocation", destinationQRCode);
+                intentScannerActivity.putExtra("skipScanner", false);
+                startActivity(intentScannerActivity);
+            }
+
+            //Search button
+            if (view.getId() == R.id.button_location_text) {
+
+                handleUserInputErrorAndIntent();
+            }
         } catch (Exception e) {
-            Log.e(TAG + " intend exception", String.valueOf(e));
+            Log.e(TAG + " onClick exception", String.valueOf(e));
         }
     }
 
@@ -170,5 +208,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onPause() {
         super.onPause();
+    }
+
+    //Handle user input valid rooms
+    private void handleUserInputErrorAndIntent() {
+
+        String userInput = Objects.requireNonNull(findOwnLocationEditText.getText()).toString().replace(".", "");
+
+        ArrayList<String> roomNames = new ArrayList<>();
+
+        //Check valid input
+        for (int index = 0; index < rooms.size(); index++) {
+
+            roomNames.add(rooms.get(index).getRoomName());
+        }
+        if (!roomNames.contains(findOwnLocationEditText.getText().toString())) {
+
+            findOwnLocationLayoutText.setError(getText(R.string.error_message_room_input));
+        }
+        if (roomNames.contains(findOwnLocationEditText.getText().toString())) {
+
+            findOwnLocationLayoutText.setError(null);
+        }
+
+        //Intent
+        if (findOwnLocationLayoutText.getError() == null) {
+            destinationQRCode = JUST_LOCATION;
+            Intent intentScannerActivity = new Intent(this, ScannerActivity.class);
+            intentScannerActivity.putExtra("destinationLocation", destinationQRCode);
+            intentScannerActivity.putExtra("ownLocation", userInput);
+            intentScannerActivity.putExtra("skipScanner", true);
+            startActivity(intentScannerActivity);
+        }
     }
 }
