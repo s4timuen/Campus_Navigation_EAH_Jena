@@ -21,6 +21,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 import de.eahjena.wi.campusnavigationeahjena.R;
@@ -61,11 +63,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Get lists of room names and persons for spinners
         Resources resource = getResources();
-        String defaultSelection = resource.getString(R.string.select_from_spinner);
         ArrayList<String> roomNames = new ArrayList<>();
-        roomNames.add(defaultSelection);
         ArrayList<String> persons = new ArrayList<>();
-        persons.add(defaultSelection);
 
         try {
             for (int i = 0; i < rooms.size(); i++) {
@@ -86,9 +85,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.e(TAG + " error creating lists for spinners", String.valueOf(e));
         }
 
-        final ArrayList<Room> finalRooms = rooms;
+        //Sort rooms and persons alphabetically
+        Collections.sort(roomNames, new Comparator<String>() {
+            @Override
+            public int compare(String stringOne, String stringTwo) {
+                return stringOne.compareTo(stringTwo);
+            }});
+        Collections.sort(persons, new Comparator<String>() {
+            @Override
+            public int compare(String stringOne, String stringTwo) {
+                return stringOne.compareTo(stringTwo);
+            }});
 
-        //TODO: sort by building
+        //Default element
+        String defaultSelection = resource.getString(R.string.select_from_spinner);
+        roomNames.add(0, defaultSelection);
+        persons.add(0, defaultSelection);
+
         //Spinner for room search intent
         final Spinner searchByRoom = findViewById(R.id.spinner_by_room);
         ArrayAdapter<String> searchByRoomAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, roomNames);
@@ -100,7 +113,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
                 Object item = adapterView.getItemAtPosition(index);
                 if (item != null && index != 0) {
-                    destinationQRCode = finalRooms.get(index - 1).getQRCode();
+                    for (int i = 0; i < rooms.size(); i++) {
+                        //item 03.03.33 qr-code 030333
+                        String checkQRCode = item.toString();
+                        checkQRCode.replace(".", "");
+                        if (checkQRCode.equals(rooms.get(i).getRoomName())) {
+                            destinationQRCode = rooms.get(i).getQRCode();
+                        }
+                    }
+
                     try {
                         Intent intentScannerActivity = new Intent(view.getContext(), ScannerActivity.class);
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
@@ -117,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        //TODO: sort by alphabet
         //Spinner for person search intents
         Spinner searchByPerson = findViewById(R.id.spinner_by_person);
         ArrayAdapter<String> searchByPersonAdapter = new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, persons);
@@ -129,10 +149,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
                 Object item = adapterView.getItemAtPosition(index);
                 if (item != null && index != 0) {
-                    for (int i = 0; i < finalRooms.size(); i++) {
-                        for (int j = 0; j < finalRooms.get(i).getPersons().size(); j++) {
-                            if (item.equals(finalRooms.get(i).getPersons().get(j))) {
-                                destinationQRCode = finalRooms.get(i).getQRCode();
+                    for (int i = 0; i < rooms.size(); i++) {
+                        for (int j = 0; j < rooms.get(i).getPersons().size(); j++) {
+                            if (item.equals(rooms.get(i).getPersons().get(j))) {
+                                destinationQRCode = rooms.get(i).getQRCode();
                             }
                         }
                     }

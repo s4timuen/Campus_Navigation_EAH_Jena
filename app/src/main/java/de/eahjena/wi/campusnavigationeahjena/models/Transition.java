@@ -23,6 +23,20 @@ public class Transition extends Cell{
         return connectedCells;
     }
 
+
+    public Cell getSingleCell(String building, String floor) {
+
+        Cell cell = new Cell();
+
+        for (int index = 0; index < connectedCells.size(); index++) {
+
+            if (connectedCells.get(index).getBuilding().equals(building) && connectedCells.get(index).getFloor().equals(floor)) {
+                cell = connectedCells.get(index);
+            }
+        }
+        return cell;
+    }
+
     //Setter
     public void setTypeOfTransition(String typeOfTransition) {
         this.typeOfTransition = typeOfTransition;

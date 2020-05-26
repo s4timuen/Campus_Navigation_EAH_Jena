@@ -129,13 +129,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Calculate route (get ArrayList<Cell> of cells to walk)
         if (!JUST_LOCATION.equals(destinationQRCode)) {
-            Log.i("_____TEST_1_____", startLocation.getBuilding());
-            Log.i("_____TEST_1_____", startLocation.getFloor());
-            Log.i("_____TEST_1_____", ownLocation);
-            getRoute();     //TODO: FIX: wrong start plan (sometimes), changes from TEST_1 to TEST_2, also differs in portrait and landscape scan
-            Log.i("_____TEST_2_____", startLocation.getBuilding());
-            Log.i("_____TEST_2_____", startLocation.getFloor());
-            Log.i("_____TEST_2_____", ownLocation);
+            getRoute();
         }
 
         //Draw navigation stuff of current floor in fragment
@@ -232,6 +226,8 @@ public class NavigationActivity extends AppCompatActivity {
         try {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
             cellsToWalk.addAll(routeCalculator.getNavigationCells());
+            Log.i("_____TEST_3_____", destinationLocation.getBuilding());
+            Log.i("_____TEST_3_____", String.valueOf(cellsToWalk.size()));
         } catch (Exception e) {
             Log.e(TAG + " error calculating route ", String.valueOf(e));
         }
@@ -494,7 +490,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Add route path to ConstraintLayout
         try {
-            if (!destinationQRCode.equals(JUST_LOCATION)) { //TODO: ??: 3,1,2
+            if (!destinationQRCode.equals(JUST_LOCATION)) { //TODO: ??: 3,1,2 Buildings
                 for (int j = 0; j < cellsToWalk.size(); j++) {
                     if (cellsToWalk.get(j).getBuilding().equals(building) && cellsToWalk.get(j).getFloor().equals(floor)) {
 
