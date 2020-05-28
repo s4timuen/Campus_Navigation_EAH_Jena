@@ -226,8 +226,6 @@ public class NavigationActivity extends AppCompatActivity {
         try {
             RouteCalculator routeCalculator = new RouteCalculator(this, startLocation, destinationLocation, transitions);
             cellsToWalk.addAll(routeCalculator.getNavigationCells());
-            Log.i("_____TEST_3_____", destinationLocation.getBuilding());
-            Log.i("_____TEST_3_____", String.valueOf(cellsToWalk.size()));
         } catch (Exception e) {
             Log.e(TAG + " error calculating route ", String.valueOf(e));
         }
@@ -443,8 +441,6 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     //TODO: TEST: diff devices / resolutions
-
-    //TODO: FIX: ug bug
 
     //Draw graphical output
     private void drawNavigation(String building, String floor) {

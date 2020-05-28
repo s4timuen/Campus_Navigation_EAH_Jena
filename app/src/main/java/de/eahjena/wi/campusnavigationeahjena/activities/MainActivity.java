@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Get lists of room names and persons for spinners
         Resources resource = getResources();
-        ArrayList<String> roomNames = new ArrayList<>();
+        final ArrayList<String> roomNames = new ArrayList<>();
         ArrayList<String> persons = new ArrayList<>();
 
         try {
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return stringOne.compareTo(stringTwo);
             }});
 
-        //Default element
+        //Default elements
         String defaultSelection = resource.getString(R.string.select_from_spinner);
         roomNames.add(0, defaultSelection);
         persons.add(0, defaultSelection);
@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     try {
                         Intent intentScannerActivity = new Intent(view.getContext(), ScannerActivity.class);
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
+                        roomNames.remove(0);
+                        intentScannerActivity.putExtra("availableRooms", roomNames);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
                         Log.e(TAG + " intend exception", String.valueOf(e));
@@ -159,6 +161,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     try {
                         Intent intentScannerActivity = new Intent(view.getContext(), ScannerActivity.class);
                         intentScannerActivity.putExtra("destinationQRCode", destinationQRCode);
+                        roomNames.remove(0);
+                        intentScannerActivity.putExtra("availableRooms", roomNames);
                         startActivity(intentScannerActivity);
                     } catch (Exception e) {
                         Log.e(TAG + " intend exception", String.valueOf(e));

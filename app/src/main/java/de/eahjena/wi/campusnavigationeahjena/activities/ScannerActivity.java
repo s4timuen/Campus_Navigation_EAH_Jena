@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.Result;
 
+import java.util.ArrayList;
+
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class ScannerActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
@@ -25,6 +27,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private String destinationQRCode;
     String ownLocation;
     boolean skipScanner;
+    ArrayList<String> availableRooms;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
         destinationQRCode = intendScannerActivity.getStringExtra("destinationQRCode");
         ownLocation = intendScannerActivity.getStringExtra("ownLocation");
         skipScanner = intendScannerActivity.getBooleanExtra("skipScanner", false);
+        availableRooms = intendScannerActivity.getStringArrayListExtra("availableRooms");
 
         if (skipScanner) {
             try {
@@ -60,12 +64,30 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
 
     @Override
     public void handleResult(Result rawResult) {
+
+        ownLocation = rawResult.getText();
+        ArrayList<String> availableRoomsQRCodes = new ArrayList<>();
+
         try {
-            ownLocation = rawResult.getText();
-            Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-            intentNavigationActivity.putExtra("ownLocation", ownLocation);
-            intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
-            startActivity(intentNavigationActivity);
+            //Get list of all valid qr-codes
+            for (int index = 0; index < availableRooms.size(); index++) {
+                String roomToQRCode = availableRooms.get(index).replaceAll("\\.", "");
+                availableRoomsQRCodes.add(roomToQRCode);
+            }
+
+            //Check if QR-Code is valid and intent
+            if (availableRoomsQRCodes.contains(ownLocation)) {
+                Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
+                intentNavigationActivity.putExtra("ownLocation", ownLocation);
+                intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
+                startActivity(intentNavigationActivity);
+            }
+            if(!availableRoomsQRCodes.contains(ownLocation)) {
+                mScannerView.stopCameraPreview();
+                mScannerView.stopCamera();
+                mScannerView.startCamera();
+                mScannerView.resumeCameraPreview(this);
+            }
         } catch (Exception e) {
             Log.e(TAG + " intend exception", String.valueOf(e));
         }
