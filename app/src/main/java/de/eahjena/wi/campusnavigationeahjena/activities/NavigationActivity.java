@@ -53,6 +53,10 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String BUILDING_04 = "04";
     private static final String BUILDING_05 = "05";
 
+    private static final String TRANSITION_TYPE_STAIR = "stair";
+    private static final String TRANSITION_TYPE_ELEVATOR = "elevator";
+    private static final String TRANSITION_TYPE_CROSSING = "crossing";
+
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
     private static final String JUST_LOCATION = "just own location";
@@ -218,7 +222,6 @@ public class NavigationActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG + " error getting destination location room", String.valueOf(e));
         }
-
     }
 
     //Calculate route (get ArrayList<Cell> of cells to walk through buildings and floors)
@@ -403,11 +406,33 @@ public class NavigationActivity extends AppCompatActivity {
         return Math.round( (float) dp * density);
     }
 
+    //Draw path cells
+    private void drawPathCells(int index, int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+        ImageView pathCellIcon = new ImageView(this);
+        pathCellIcon.setImageResource(R.drawable.path_cell_icon);
+        pathCellIcon.setX(dpToPx(cellsToWalk.get(index).getXCoordinate() + xOffset) * xScaling);
+        pathCellIcon.setY(dpToPx(cellsToWalk.get(index).getYCoordinate() + yOffset) * yScaling);
+        if (relativeLayout != null) {
+            relativeLayout.addView(pathCellIcon);
+        }
+    }
+
+    //Draw destination location
+    private void drawDestinationLocation(int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+        ImageView destinationIcon = new ImageView(this);
+        destinationIcon.setImageResource(R.drawable.destination_icon);
+        destinationIcon.setX(dpToPx(destinationLocation.getXCoordinate() + xOffset) * xScaling);
+        destinationIcon.setY(dpToPx(destinationLocation.getYCoordinate() + yOffset) * yScaling);
+        if (relativeLayout != null) {
+            relativeLayout.addView(destinationIcon);
+        }
+    }
+
     //Draw transitions
     private void drawTransitions(String building, String floor, int xScaling, int yScaling, int xOffset, int yOffset, int i, int j, RelativeLayout relativeLayout) {
         if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(building)
                 && transitions.get(i).getConnectedCells().get(j).getFloor().equals(floor)) {
-            if (transitions.get(i).getTypeOfTransition().equals("stair")) {
+            if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_STAIR)) {
 
                 ImageView stairIcon = new ImageView(this);
                 stairIcon.setImageResource(R.drawable.stair_icon);
@@ -417,7 +442,7 @@ public class NavigationActivity extends AppCompatActivity {
                     relativeLayout.addView(stairIcon);
                 }
             }
-            if (transitions.get(i).getTypeOfTransition().equals("elevator")) {
+            if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_ELEVATOR)) {
 
                 ImageView elevatorIcon = new ImageView(this);
                 elevatorIcon.setImageResource(R.drawable.elevator_icon);
@@ -427,7 +452,7 @@ public class NavigationActivity extends AppCompatActivity {
                     relativeLayout.addView(elevatorIcon);
                 }
             }
-            if (transitions.get(i).getTypeOfTransition().equals("crossing")) {
+            if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
 
                 ImageView crossingIcon = new ImageView(this);
                 crossingIcon.setImageResource(R.drawable.crossing_icon);
@@ -449,6 +474,9 @@ public class NavigationActivity extends AppCompatActivity {
         int yScaling = 0;
         int xOffset = 0;
         int yOffset = 0;
+
+        boolean buildingsThreeTwoOne = building.equals(BUILDING_03) || building.equals(BUILDING_02)
+                || building.equals(BUILDING_01);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             xScaling = X_SCALING_PORTRAIT;
@@ -486,17 +514,24 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Add route path to ConstraintLayout
         try {
-            if (!destinationQRCode.equals(JUST_LOCATION)) { //TODO: ??: 3,1,2 Buildings
+            if (!destinationQRCode.equals(JUST_LOCATION)) {
                 for (int j = 0; j < cellsToWalk.size(); j++) {
-                    if (cellsToWalk.get(j).getBuilding().equals(building) && cellsToWalk.get(j).getFloor().equals(floor)) {
+                    if (cellsToWalk.get(j).getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05)
+                            && cellsToWalk.get(j).getFloor().equals(floor)) {
 
-                        ImageView pathCellIcon = new ImageView(this);
-                        pathCellIcon.setImageResource(R.drawable.path_cell_icon);
-                        pathCellIcon.setX(dpToPx(cellsToWalk.get(j).getXCoordinate() + xOffset) * xScaling);
-                        pathCellIcon.setY(dpToPx(cellsToWalk.get(j).getYCoordinate() + yOffset) * yScaling);
-                        if (relativeLayout != null) {
-                            relativeLayout.addView(pathCellIcon);
-                        }
+                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                    }
+                    if (cellsToWalk.get(j).getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04)
+                            && cellsToWalk.get(j).getFloor().equals(floor)) {
+
+                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                    }
+                    if ((cellsToWalk.get(j).getBuilding().equals(BUILDING_03)
+                            || cellsToWalk.get(j).getBuilding().equals(BUILDING_02)
+                            || cellsToWalk.get(j).getBuilding().equals(BUILDING_01))
+                            && buildingsThreeTwoOne && cellsToWalk.get(j).getFloor().equals(floor)) {
+
+                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
                 }
             }
@@ -521,14 +556,23 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Add destination location room icon to ConstraintLayout
         try {
-            if (!destinationQRCode.equals(JUST_LOCATION) && building.equals(destinationLocation.getBuilding()) && floor.equals(destinationLocation.getFloor())) {
-                ImageView destinationIcon = new ImageView(this);
-                destinationIcon.setImageResource(R.drawable.destination_icon);
-                destinationIcon.setX(dpToPx(destinationLocation.getXCoordinate() + xOffset) * xScaling);
-                destinationIcon.setY(dpToPx(destinationLocation.getYCoordinate() + yOffset) * yScaling);
-                if (relativeLayout != null) {
-                    relativeLayout.addView(destinationIcon);
+            if (!destinationQRCode.equals(JUST_LOCATION)) {
+                if (destinationLocation.getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05) && floor.equals(destinationLocation.getFloor())) {
+
+                    drawDestinationLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
                 }
+                if (destinationLocation.getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04) && floor.equals(destinationLocation.getFloor())) {
+
+                    drawDestinationLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                }
+                if ((destinationLocation.getBuilding().equals(BUILDING_03)
+                        || destinationLocation.getBuilding().equals(BUILDING_02)
+                        || destinationLocation.getBuilding().equals(BUILDING_01))
+                        && buildingsThreeTwoOne && floor.equals(destinationLocation.getFloor())) {
+
+                    drawDestinationLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                }
+
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing destination location room", String.valueOf(e));
@@ -540,14 +584,9 @@ public class NavigationActivity extends AppCompatActivity {
                 for (int j = 0; j < transitions.get(i).getConnectedCells().size(); j++) {
                     if (building.equals(BUILDING_01) || building.equals(BUILDING_02) || building.equals(BUILDING_03)) {
 
-                        building = BUILDING_01;
-                        drawTransitions(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
-
-                        building = BUILDING_02;
-                        drawTransitions(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
-
-                        building = BUILDING_03;
-                        drawTransitions(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransitions(BUILDING_01, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransitions(BUILDING_02, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransitions(BUILDING_03, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                     }
                     if (building.equals(BUILDING_04) || building.equals(BUILDING_05)) {
 
