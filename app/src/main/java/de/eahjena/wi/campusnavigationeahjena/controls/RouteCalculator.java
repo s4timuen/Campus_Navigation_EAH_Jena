@@ -80,6 +80,7 @@ public class RouteCalculator {
 
                 Log.i("_____TEST_startCell_b.f____", startCell.getBuilding() + "." + startCell.getFloor());
                 Log.i("_____TEST_startCell_x.y____", String.valueOf(startCell.getXCoordinate() + "." + startCell.getYCoordinate()));
+                Log.i("_____TEST_startCell_w____", String.valueOf(startCell.getWalkability()));
 
                 //Get reachable transitions and sort by distance
                 ArrayList<Transition> reachableTransitions = getReachableTransitions(startCell);
@@ -203,6 +204,7 @@ public class RouteCalculator {
 
                 Log.i("_____TEST_endCell_b.f____", endCell.getBuilding() + "." + endCell.getFloor());
                 Log.i("_____TEST_endCell_x.y____", endCell.getXCoordinate() + "." + endCell.getYCoordinate());
+                Log.i("_____TEST_endCell_w____", String.valueOf(endCell.getWalkability()));
 
                 //Get path through floor
                 AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
@@ -210,18 +212,14 @@ public class RouteCalculator {
 
                 Log.i("_____CELLS_TO_WALK_part_____", String.valueOf(aStarAlgorithm.getNavigationCellsOnGrid()));
 
-                //TODO: FIX: does not add cells for index > 0
-                // -> AStarAlgorithm -> ok
-                // -> startCell and endCell coordinates -> ok
-                // -> grids -> ok
-                // -> ??
-
                 //TODO: FIX: 3/2/1 floor 0 and ug -> NullPointerException
                 // -> 5 and 4 ok
                 // -> .json data or 3/2/1 if statement ?
 
                 //TODO: FIX: does not (always) choose the nearest transition
                 // -> sort()/comparator -> ok?
+
+                //TODO: FIX: diff building -> NullPointerException (first fix 3/2/1, then test again)
 
 
                 //Set next startCell

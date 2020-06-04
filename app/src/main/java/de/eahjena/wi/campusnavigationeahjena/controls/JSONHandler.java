@@ -90,7 +90,6 @@ public class JSONHandler {
                 JSONObject jEntry = jsonArray.getJSONObject(i);
 
                 entry.setTypeOfTransition(jEntry.optString("type"));
-                entry.setWalkability(jEntry.optBoolean("walkable"));
 
                 ArrayList<Cell> connectedCells = new ArrayList<>();
                 JSONArray connectedCellsJSON = jEntry.getJSONArray("connectedCells");
@@ -103,6 +102,7 @@ public class JSONHandler {
                     cell.setFloor(cellJSON.optString("floor"));
                     cell.setXCoordinate(cellJSON.optInt("xCoordinate"));
                     cell.setYCoordinate(cellJSON.optInt("yCoordinate"));
+                    cell.setWalkability(cellJSON.optBoolean("walkable"));
 
                     connectedCells.add(cell);
                 }
