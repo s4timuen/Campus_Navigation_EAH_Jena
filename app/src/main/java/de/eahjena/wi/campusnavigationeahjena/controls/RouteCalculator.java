@@ -83,8 +83,7 @@ public class RouteCalculator {
                 Log.i("_____TEST_startCell_w____", String.valueOf(startCell.getWalkability()));
 
                 //Get reachable transitions and sort by distance
-                ArrayList<Transition> reachableTransitions = getReachableTransitions(startCell);
-                reachableTransitions = aStarTransitions(index, startCell, reachableTransitions);
+                ArrayList<Transition> reachableTransitions = getUsableTransitions(startCell, grids, index);
 
                 //Set endCell
                 //Set endCell with destinationLocation on same floor plan
@@ -212,15 +211,7 @@ public class RouteCalculator {
 
                 Log.i("_____CELLS_TO_WALK_part_____", String.valueOf(aStarAlgorithm.getNavigationCellsOnGrid()));
 
-                //TODO: FIX: 3/2/1 floor 0 and ug -> NullPointerException
-                // -> 5 and 4 ok
-                // -> .json data or 3/2/1 if statement ?
-
-                //TODO: FIX: does not (always) choose the nearest transition
-                // -> sort()/comparator -> ok?
-
-                //TODO: FIX: diff building -> NullPointerException (first fix 3/2/1, then test again)
-
+                //TODO: FIX: diff building -> NullPointerException
 
                 //Set next startCell
                 if (index + 1 < grids.size()) {
@@ -342,8 +333,8 @@ public class RouteCalculator {
 
         Log.i("_____TEST_CELLS_TO_WALK_ALL_____", String.valueOf(cellsToWalk.size()));
         for (int i = 0; i < cellsToWalk.size(); i++) {
-            Log.i("_____TEST_CELLS_TO_WALK_X_____", cellsToWalk.get(i).getBuilding() + "." + cellsToWalk.get(i).getFloor() + "." + cellsToWalk.get(i).getXCoordinate());
-            Log.i("_____TEST_CELLS_TO_WALK_Y_____", cellsToWalk.get(i).getBuilding() + "." + cellsToWalk.get(i).getFloor() + "." + cellsToWalk.get(i).getYCoordinate());
+            Log.i("_____TEST_CELLS_TO_WALK_x.y_____", cellsToWalk.get(i).getBuilding() + "." + cellsToWalk.get(i).getFloor() + ":"
+                    + cellsToWalk.get(i).getXCoordinate() + "." + cellsToWalk.get(i).getYCoordinate());
         }
 
         return cellsToWalk;
@@ -736,62 +727,119 @@ public class RouteCalculator {
         return floorPlan;
     }
 
-    //Get all reachable transitions on  current floor plan
-    private ArrayList<Transition> getReachableTransitions(Cell startCell) {
+    //Get all usable transitions on current floor plan, sorted by distance, crossings are not allowed on index = 0
+    private ArrayList<Transition> getUsableTransitions(Cell startCell, ArrayList<ArrayList<ArrayList<Cell>>> grids, int index) {
 
-        ArrayList<Transition> reachableTransitionsHelper = new ArrayList<>();
+        ArrayList<Transition> usableTransitionsHelper = new ArrayList<>();
+        ArrayList<Transition> adjustedUsableTransitions = new ArrayList<>();
 
         try {
-            for (int index = 0; index < transitions.size(); index++) {
-                for (int i = 0; i < transitions.get(index).getConnectedCells().size(); i++) {
-                    if (transitions.get(index).getConnectedCells().get(i).getBuilding().equals(BUILDING_05)
-                            && startCell.getBuilding().equals(BUILDING_05)
-                            && transitions.get(index).getConnectedCells().get(i).getFloor().equals(startCell.getFloor())) {
+            if (index + 1 < grids.size()) {
 
+                //Get all reachable transitions
+                for (int i = 0; i < transitions.size(); i++) {
 
-                        reachableTransitionsHelper.add(transitions.get(index));
+                    for (int j = 0; j < transitions.get(i).getConnectedCells().size(); j++) {
+
+                        //Transition reachable from current floor
+                        if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_05)
+                                && startCell.getBuilding().equals(BUILDING_05)
+                                && transitions.get(i).getConnectedCells().get(j).getFloor().equals(startCell.getFloor())) {
+
+                            //Next floor in grids reachable from transition
+                            if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                                    && transitions.get(i).getConnectedCells().get(j).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
+
+                                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, transitions.get(i).getConnectedCells().get(j), grids.get(index));
+                                ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
+                                usableTransitionsHelper.get(i).setFinalCost(navigationCells.size());
+                                usableTransitionsHelper.add(transitions.get(i));
+                            }
+                        }
+
+                        //Transition reachable from current floor
+                        if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_04)
+                                && startCell.getBuilding().equals(BUILDING_04)
+                                && transitions.get(i).getConnectedCells().get(j).getFloor().equals(startCell.getFloor())) {
+
+                            //Next floor in grids reachable from transition
+                            if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                                    && transitions.get(i).getConnectedCells().get(j).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
+
+                                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, transitions.get(i).getConnectedCells().get(j), grids.get(index));
+                                ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
+                                usableTransitionsHelper.get(i).setFinalCost(navigationCells.size());
+                                usableTransitionsHelper.add(transitions.get(i));
+                            }
+                        }
+
+                        //Transition reachable from current floor
+                        if ((transitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_03)
+                                || transitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_02)
+                                || transitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_01))
+                                && (startCell.getBuilding().equals(BUILDING_03)
+                                || startCell.getBuilding().equals(BUILDING_02)
+                                || startCell.getBuilding().equals(BUILDING_01))
+                                && transitions.get(i).getConnectedCells().get(j).getFloor().equals(startCell.getFloor())) {
+
+                            Log.i("_____TEST_COMP_1.1_____", String.valueOf(transitions.get(i).getConnectedCells().get(j).getFinalCost()));  // executed
+                            Log.i("_____TEST_COMP_1.1.1_____", String.valueOf(transitions.get(i).getConnectedCells().get(j).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                                    && transitions.get(i).getConnectedCells().get(j).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())));
+
+                            //Next floor in grids reachable from transition
+                            if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(grids.get(index + 1).get(0).get(0).getBuilding())
+                                    && transitions.get(i).getConnectedCells().get(j).getFloor().equals(grids.get(index + 1).get(0).get(0).getFloor())) {
+                                // j on current floor, need to check what?
+                                // -> has transition, in which is j a cell, which connects to grids.get(index + 1)
+                                // anything else to check?
+
+                                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, transitions.get(i).getConnectedCells().get(j), grids.get(index));
+                                ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
+                                usableTransitionsHelper.get(i).setFinalCost(navigationCells.size());
+                                usableTransitionsHelper.add(transitions.get(i));
+
+                                Log.i("_____TEST_COMP_1.2_____", String.valueOf(transitions.get(i).getConnectedCells().get(j).getFinalCost()));  // not executed -> if statements
+                            }
+                        }
                     }
-                    if (transitions.get(index).getConnectedCells().get(i).getBuilding().equals(BUILDING_04)
-                            && startCell.getBuilding().equals(BUILDING_04)
-                            && transitions.get(index).getConnectedCells().get(i).getFloor().equals(startCell.getFloor())) {
+                }
+                Log.i("_____TEST_COMP_2_____", String.valueOf(usableTransitionsHelper.size()));
 
-                        reachableTransitionsHelper.add(transitions.get(index));
+                //Sort by distance
+                usableTransitionsHelper.sort(new Comparator<Transition>() {
+                    public int compare(Transition TransitionOne, Transition TransitionTwo) {
+                        return Integer.compare(TransitionOne.getFinalCost(), TransitionTwo.getFinalCost());
                     }
-                    if ((transitions.get(index).getConnectedCells().get(i).getBuilding().equals(BUILDING_03)
-                            || transitions.get(index).getConnectedCells().get(i).getBuilding().equals(BUILDING_02)
-                            || transitions.get(index).getConnectedCells().get(i).getBuilding().equals(BUILDING_01))
-                            && (startCell.getBuilding().equals(BUILDING_03)
-                            || startCell.getBuilding().equals(BUILDING_02)
-                            || startCell.getBuilding().equals(BUILDING_01))
-                            && transitions.get(index).getConnectedCells().get(i).getFloor().equals(startCell.getFloor())) {
+                });
 
-                        reachableTransitionsHelper.add(transitions.get(index));
+                for (int i = 0; i < usableTransitionsHelper.size(); i++) {
+                    Log.i("_____TEST_COMP_3_____", String.valueOf(usableTransitionsHelper.get(i).getFinalCost()));
+                }
+
+                //Put crossings to the end, crossings not allowed on index = 0
+                for (int j = 0; j < usableTransitionsHelper.size(); j++) {
+
+                    if (!usableTransitionsHelper.get(j).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
+                        adjustedUsableTransitions.add(usableTransitionsHelper.get(j));
+                    }
+                }
+
+                for (int j = 0; j < usableTransitionsHelper.size(); j++) {
+
+                    if (usableTransitionsHelper.get(j).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
+
+                        adjustedUsableTransitions.add(usableTransitionsHelper.get(j));
                     }
                 }
             }
         } catch (Exception e) {
             Log.e(TAG + " error getting reachable transitions", String.valueOf(e));
         }
-        return reachableTransitionsHelper;
+
+        Log.i("_____TEST_AUT_____", String.valueOf(adjustedUsableTransitions.size()));
+
+        return adjustedUsableTransitions; // .size() = 0
     }
-
-    //Find nearest transition to use
-    private ArrayList<Transition> aStarTransitions(int index, Cell startCell, ArrayList<Transition> reachableTransitionsHelper) {
-        //aStar all reachable transitions
-        for (int j = 0; j < reachableTransitionsHelper.size(); j++) {
-
-            AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, reachableTransitionsHelper.get(j), grids.get(index));
-            ArrayList<Cell> navigationCells = aStarAlgorithm.getNavigationCellsOnGrid();
-
-            reachableTransitionsHelper.get(j).setFinalCost(navigationCells.size());
-
-            reachableTransitionsHelper.sort(new Comparator<Transition>() {
-                public int compare(Transition TransitionOne, Transition TransitionTwo) {
-                    return Integer.compare(TransitionOne.getFinalCost(), TransitionTwo.getFinalCost());
-                }
-            });
-        }
-        return reachableTransitionsHelper;
-    }
-
 }

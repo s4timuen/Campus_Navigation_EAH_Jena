@@ -417,6 +417,17 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    //Draw start location
+    private void drawStartLocation(int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+        ImageView startIcon = new ImageView(this);
+        startIcon.setImageResource(R.drawable.start_icon);
+        startIcon.setX(dpToPx(startLocation.getXCoordinate() + xOffset) * xScaling);
+        startIcon.setY(dpToPx(startLocation.getYCoordinate() + yOffset) * yScaling);
+        if (relativeLayout != null) {
+            relativeLayout.addView(startIcon);
+        }
+    }
+
     //Draw destination location
     private void drawDestinationLocation(int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
         ImageView destinationIcon = new ImageView(this);
@@ -541,14 +552,20 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Add own location room icon to Overlay
         try {
-            if (building.equals(startLocation.getBuilding()) && floor.equals(startLocation.getFloor())) {
-                ImageView startIcon = new ImageView(this);
-                startIcon.setImageResource(R.drawable.start_icon);
-                startIcon.setX(dpToPx(startLocation.getXCoordinate() + xOffset) * xScaling);
-                startIcon.setY(dpToPx(startLocation.getYCoordinate() + yOffset) * yScaling);
-                if (relativeLayout != null) {
-                    relativeLayout.addView(startIcon);
-                }
+            if (startLocation.getBuilding().equals(BUILDING_05) && startLocation.getFloor().equals(floor)) {
+
+                drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
+            }
+            if (startLocation.getBuilding().equals(BUILDING_04) && startLocation.getFloor().equals(floor)) {
+
+                drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
+            }
+            if ((startLocation.getBuilding().equals(BUILDING_03)
+                    || startLocation.getBuilding().equals(BUILDING_02)
+                    || startLocation.getBuilding().equals(BUILDING_01))
+                    && startLocation.getFloor().equals(floor)) {
+
+                drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing own location room", String.valueOf(e));
