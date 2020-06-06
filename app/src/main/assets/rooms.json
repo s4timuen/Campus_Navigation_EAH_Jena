@@ -2474,7 +2474,7 @@
         "building": "03",
         "floor": "00",
         "persons": [],
-        "qrCode": "",
+        "qrCode": "030002",
         "xCoordinate": 23,
         "yCoordinate": 8,
         "walkable": true

@@ -136,7 +136,7 @@ public class NavigationActivity extends AppCompatActivity {
             getRoute();
         }
 
-        //Draw navigation stuff of current floor in fragment
+        //Draw navigation
         drawNavigation(startLocation.getBuilding(), startLocation.getFloor());
     }
 
@@ -552,17 +552,18 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Add own location room icon to Overlay
         try {
-            if (startLocation.getBuilding().equals(BUILDING_05) && startLocation.getFloor().equals(floor)) {
+            if (startLocation.getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05) && startLocation.getFloor().equals(floor)) {
 
                 drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
             }
-            if (startLocation.getBuilding().equals(BUILDING_04) && startLocation.getFloor().equals(floor)) {
+            if (startLocation.getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04) && startLocation.getFloor().equals(floor)) {
 
                 drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
             }
             if ((startLocation.getBuilding().equals(BUILDING_03)
                     || startLocation.getBuilding().equals(BUILDING_02)
                     || startLocation.getBuilding().equals(BUILDING_01))
+                    && (buildingsThreeTwoOne)
                     && startLocation.getFloor().equals(floor)) {
 
                 drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
