@@ -13,7 +13,6 @@ public class Room extends Cell{
 
     //Constructors
     public Room() {
-
     }
 
     //Getter

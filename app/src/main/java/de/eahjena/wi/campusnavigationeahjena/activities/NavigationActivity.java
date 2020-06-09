@@ -59,7 +59,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
-    private static final String JUST_LOCATION = "just own location";
+    private static final String JUST_LOCATION = "location";
 
     private static final int X_SCALING_PORTRAIT = 9;
     private static final int Y_SCALING_PORTRAIT = 9;
@@ -98,13 +98,17 @@ public class NavigationActivity extends AppCompatActivity {
 
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+
                 Object item = adapterView.getItemAtPosition(index);
+
                 if (item != null && index != 0) {
+
                     try {
                         ArrayList<String> helperBuildingAndFloor = getBuildingAndFloor((String) item);
                         drawNavigation(helperBuildingAndFloor.get(0), helperBuildingAndFloor.get(1));
                     } catch (Exception e) {
                         Log.e(TAG + " error changing map", String.valueOf(e));
+                        e.printStackTrace();
                     }
                 }
             }
@@ -117,8 +121,8 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Get extra from parent
         Intent intendScannerActivity = getIntent();
-        ownLocation = intendScannerActivity.getStringExtra("ownLocation");
-        destinationQRCode = intendScannerActivity.getStringExtra("destinationQRCode");
+        ownLocation = intendScannerActivity.getStringExtra("startLocation");
+        destinationQRCode = intendScannerActivity.getStringExtra("destinationLocation");
 
         //Get rooms, stairs, elevators and crossings from JSON
         getRoomsAndTransitions();
@@ -128,11 +132,13 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Get destination location room
         if (!JUST_LOCATION.equals(destinationQRCode)) {
+
             getDestinationLocation();
         }
 
         //Calculate route (get ArrayList<Cell> of cells to walk)
         if (!JUST_LOCATION.equals(destinationQRCode)) {
+
             getRoute();
         }
 
@@ -180,6 +186,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Get rooms, stairs, elevators and crossings from JSON
     private void getRoomsAndTransitions() {
+
         try {
             JSONHandler jsonHandler = new JSONHandler();
             String json;
@@ -192,11 +199,13 @@ public class NavigationActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Log.e(TAG + " error reading or parsing JSON files", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 
     //get own location room
     private void getOwnLocation() {
+
         try {
             for (int i = 0; i < rooms.size(); i++) {
 
@@ -207,11 +216,13 @@ public class NavigationActivity extends AppCompatActivity {
         } catch (
                 Exception e) {
             Log.e(TAG + " QR-Code invalid", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 
     //Get destination location room
     private void getDestinationLocation() {
+
         try {
             for (int i = 0; i < rooms.size(); i++) {
 
@@ -221,6 +232,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error getting destination location room", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 
@@ -231,6 +243,7 @@ public class NavigationActivity extends AppCompatActivity {
             cellsToWalk.addAll(routeCalculator.getNavigationCells());
         } catch (Exception e) {
             Log.e(TAG + " error calculating route ", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 
@@ -238,6 +251,7 @@ public class NavigationActivity extends AppCompatActivity {
     private String getFloorPlan(String building, String floor) {
 
         String floorPlan = "";
+
         try {
             switch (building + "." + floor) {
                 case "01.ug":
@@ -305,6 +319,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error getting floor plan", String.valueOf(e));
+            e.printStackTrace();
         }
         return floorPlan;
     }
@@ -315,6 +330,7 @@ public class NavigationActivity extends AppCompatActivity {
         ArrayList<String> helperBuildingAndFloor = new ArrayList<>();
 
         Locale currentLocale = getResources().getConfiguration().getLocales().get(0);
+
         try {
             if (in.equals(getLocaleStringResource(currentLocale, R.string.building_03_02_01_floor_ug))) {
                 helperBuildingAndFloor.add("03");
@@ -382,6 +398,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error getting building and floor", String.valueOf(e));
+            e.printStackTrace();
         }
         return helperBuildingAndFloor;
     }
@@ -396,22 +413,27 @@ public class NavigationActivity extends AppCompatActivity {
             localeString = this.createConfigurationContext(configuration).getString(floorPlan);
         } catch (Exception e) {
             Log.e(TAG + " error getting locale", String.valueOf(e));
+            e.printStackTrace();
         }
         return localeString;
     }
+
     //Density-Points to pixels
     private int dpToPx(int dp) {
+
         float density = getResources().getDisplayMetrics().density;
 
-        return Math.round( (float) dp * density);
+        return Math.round((float) dp * density);
     }
 
     //Draw path cells
     private void drawPathCells(int index, int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+
         ImageView pathCellIcon = new ImageView(this);
         pathCellIcon.setImageResource(R.drawable.path_cell_icon);
         pathCellIcon.setX(dpToPx(cellsToWalk.get(index).getXCoordinate() + xOffset) * xScaling);
         pathCellIcon.setY(dpToPx(cellsToWalk.get(index).getYCoordinate() + yOffset) * yScaling);
+
         if (relativeLayout != null) {
             relativeLayout.addView(pathCellIcon);
         }
@@ -419,10 +441,12 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Draw start location
     private void drawStartLocation(int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+
         ImageView startIcon = new ImageView(this);
         startIcon.setImageResource(R.drawable.start_icon);
         startIcon.setX(dpToPx(startLocation.getXCoordinate() + xOffset) * xScaling);
         startIcon.setY(dpToPx(startLocation.getYCoordinate() + yOffset) * yScaling);
+
         if (relativeLayout != null) {
             relativeLayout.addView(startIcon);
         }
@@ -430,10 +454,12 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Draw destination location
     private void drawDestinationLocation(int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+
         ImageView destinationIcon = new ImageView(this);
         destinationIcon.setImageResource(R.drawable.destination_icon);
         destinationIcon.setX(dpToPx(destinationLocation.getXCoordinate() + xOffset) * xScaling);
         destinationIcon.setY(dpToPx(destinationLocation.getYCoordinate() + yOffset) * yScaling);
+
         if (relativeLayout != null) {
             relativeLayout.addView(destinationIcon);
         }
@@ -441,42 +467,47 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Draw transitions
     private void drawTransitions(String building, String floor, int xScaling, int yScaling, int xOffset, int yOffset, int i, int j, RelativeLayout relativeLayout) {
+
         if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(building)
                 && transitions.get(i).getConnectedCells().get(j).getFloor().equals(floor)) {
+
             if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_STAIR)) {
 
                 ImageView stairIcon = new ImageView(this);
                 stairIcon.setImageResource(R.drawable.stair_icon);
                 stairIcon.setX(dpToPx(transitions.get(i).getConnectedCells().get(j).getXCoordinate() + xOffset) * xScaling);
                 stairIcon.setY(dpToPx(transitions.get(i).getConnectedCells().get(j).getYCoordinate() + yOffset) * yScaling);
+
                 if (relativeLayout != null) {
                     relativeLayout.addView(stairIcon);
                 }
             }
+
             if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_ELEVATOR)) {
 
                 ImageView elevatorIcon = new ImageView(this);
                 elevatorIcon.setImageResource(R.drawable.elevator_icon);
                 elevatorIcon.setX(dpToPx(transitions.get(i).getConnectedCells().get(j).getXCoordinate() + xOffset) * xScaling);
                 elevatorIcon.setY(dpToPx(transitions.get(i).getConnectedCells().get(j).getYCoordinate() + yOffset) * yScaling);
+
                 if (relativeLayout != null) {
                     relativeLayout.addView(elevatorIcon);
                 }
             }
+
             if (transitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
 
                 ImageView crossingIcon = new ImageView(this);
                 crossingIcon.setImageResource(R.drawable.crossing_icon);
                 crossingIcon.setX(dpToPx(transitions.get(i).getConnectedCells().get(j).getXCoordinate() + xOffset) * xScaling);
                 crossingIcon.setY(dpToPx(transitions.get(i).getConnectedCells().get(j).getYCoordinate() + yOffset) * yScaling);
+
                 if (relativeLayout != null) {
                     relativeLayout.addView(crossingIcon);
                 }
             }
         }
     }
-
-    //TODO: TEST: diff devices / resolutions
 
     //Draw graphical output
     private void drawNavigation(String building, String floor) {
@@ -490,12 +521,14 @@ public class NavigationActivity extends AppCompatActivity {
                 || building.equals(BUILDING_01);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+
             xScaling = X_SCALING_PORTRAIT;
             yScaling = Y_SCALING_PORTRAIT;
             xOffset = X_OFFSET_PORTRAIT;
             yOffset = Y_OFFSET_PORTRAIT;
         }
-        if ( getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
             xScaling = X_SCALING_LANDSCAPE;
             yScaling = Y_SCALING_LANDSCAPE;
             xOffset = X_OFFSET_LANDSCAPE;
@@ -521,22 +554,27 @@ public class NavigationActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Log.e(TAG + " error drawing floor plan", String.valueOf(e));
+            e.printStackTrace();
         }
 
         //Add route path to ConstraintLayout
         try {
             if (!destinationQRCode.equals(JUST_LOCATION)) {
+
                 for (int j = 0; j < cellsToWalk.size(); j++) {
+
                     if (cellsToWalk.get(j).getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05)
                             && cellsToWalk.get(j).getFloor().equals(floor)) {
 
                         drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
+
                     if (cellsToWalk.get(j).getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04)
                             && cellsToWalk.get(j).getFloor().equals(floor)) {
 
                         drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
+
                     if ((cellsToWalk.get(j).getBuilding().equals(BUILDING_03)
                             || cellsToWalk.get(j).getBuilding().equals(BUILDING_02)
                             || cellsToWalk.get(j).getBuilding().equals(BUILDING_01))
@@ -548,6 +586,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing route", String.valueOf(e));
+            e.printStackTrace();
         }
 
         //Add own location room icon to Overlay
@@ -556,10 +595,12 @@ public class NavigationActivity extends AppCompatActivity {
 
                 drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
             }
+
             if (startLocation.getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04) && startLocation.getFloor().equals(floor)) {
 
                 drawStartLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
             }
+
             if ((startLocation.getBuilding().equals(BUILDING_03)
                     || startLocation.getBuilding().equals(BUILDING_02)
                     || startLocation.getBuilding().equals(BUILDING_01))
@@ -570,19 +611,23 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing own location room", String.valueOf(e));
+            e.printStackTrace();
         }
 
         //Add destination location room icon to ConstraintLayout
         try {
             if (!destinationQRCode.equals(JUST_LOCATION)) {
+
                 if (destinationLocation.getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05) && floor.equals(destinationLocation.getFloor())) {
 
                     drawDestinationLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
                 }
+
                 if (destinationLocation.getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04) && floor.equals(destinationLocation.getFloor())) {
 
                     drawDestinationLocation(xOffset, xScaling, yOffset, yScaling, relativeLayout);
                 }
+
                 if ((destinationLocation.getBuilding().equals(BUILDING_03)
                         || destinationLocation.getBuilding().equals(BUILDING_02)
                         || destinationLocation.getBuilding().equals(BUILDING_01))
@@ -594,18 +639,22 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing destination location room", String.valueOf(e));
+            e.printStackTrace();
         }
 
         //Add transitions icons to ConstraintLayout
         try {
             for (int i = 0; i < transitions.size(); i++) {
+
                 for (int j = 0; j < transitions.get(i).getConnectedCells().size(); j++) {
+
                     if (building.equals(BUILDING_01) || building.equals(BUILDING_02) || building.equals(BUILDING_03)) {
 
                         drawTransitions(BUILDING_01, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                         drawTransitions(BUILDING_02, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                         drawTransitions(BUILDING_03, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                     }
+
                     if (building.equals(BUILDING_04) || building.equals(BUILDING_05)) {
 
                         drawTransitions(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
@@ -614,11 +663,12 @@ public class NavigationActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG + " error drawing transitions", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 
     //Get all walkable cells of a floor, helper method for manual mapping of JSON files
-    /**
+    /*
     private ArrayList<Cell> getWalkableCells(String building, String floor) {
 
         ArrayList<Cell> walkableCells = new ArrayList<>();
@@ -630,8 +680,9 @@ public class NavigationActivity extends AppCompatActivity {
             walkableCells = jsonHandler.parseJsonWalkableCells(json);
         } catch (Exception e) {
             Log.e(TAG + " error getting all walkable cells", String.valueOf(e));
+            e.printStackTrace();
         }
         return walkableCells;
     }
-     **/
+    */
 }

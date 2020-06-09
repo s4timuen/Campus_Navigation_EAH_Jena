@@ -25,7 +25,6 @@ public class Cell {
         this.walkable = walkable;
     }
 
-
     //Getter
     public int getHeuristicCost() {
         return heuristicCost;

@@ -63,6 +63,7 @@ class AStarAlgorithm {
             }
         } catch (Exception e) {
             Log.e(TAG + " error calculating route ", String.valueOf(e));
+            e.printStackTrace();
         }
         return navigationCells;
     }
@@ -114,10 +115,11 @@ class AStarAlgorithm {
 
     //Check and update cost of a cell
     private void checkAndUpdateCost(Cell current, Cell test, int cost) {
-        if (test.getWalkability() && !closed[test.getXCoordinate()][test.getYCoordinate()]) {
 
-            int testFinalCost = test.getHeuristicCost() + cost;
-            boolean inOpen = open.contains(test);
+        int testFinalCost = test.getHeuristicCost() + cost;
+        boolean inOpen = open.contains(test);
+
+        if (test.getWalkability() && !closed[test.getXCoordinate()][test.getYCoordinate()]) {
 
             if (!inOpen || testFinalCost < test.getFinalCost()) {
                 test.setFinalCost(cost);
@@ -132,6 +134,7 @@ class AStarAlgorithm {
 
     //Set cost of the cell to check
     private void setCostPerCell(Cell current, Cell test) {
+
         Class<? extends Cell> aClass = test.getClass();
 
         Cell compareCellClass = new Cell();
@@ -141,9 +144,11 @@ class AStarAlgorithm {
         if (aClass.equals(compareCellClass.getClass())) {
             current.setHeuristicCost(COSTS_CELL);
         }
+
         if (aClass.equals(compareRoomClass.getClass())) {
             current.setHeuristicCost(COSTS_ROOM);
         }
+
         if (aClass.equals(compareTransitionClass.getClass())) {
             current.setHeuristicCost(COSTS_TRANSITION);
         }

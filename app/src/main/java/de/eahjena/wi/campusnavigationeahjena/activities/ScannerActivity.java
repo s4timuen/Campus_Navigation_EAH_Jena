@@ -25,31 +25,32 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private ZXingScannerView mScannerView;
     private boolean mAutoFocus = true;
     private String destinationQRCode;
-    String ownLocation;
+    private String startLocation;
     boolean skipScanner;
-    ArrayList<String> availableRooms;
+    private ArrayList<String> availableRooms;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //get extra from parent
+        //Get extra from parent
         Intent intendScannerActivity = getIntent();
-        destinationQRCode = intendScannerActivity.getStringExtra("destinationQRCode");
-        ownLocation = intendScannerActivity.getStringExtra("ownLocation");
+        destinationQRCode = intendScannerActivity.getStringExtra("destinationLocation");
+        startLocation = intendScannerActivity.getStringExtra("startLocation");
         skipScanner = intendScannerActivity.getBooleanExtra("skipScanner", false);
         availableRooms = intendScannerActivity.getStringArrayListExtra("availableRooms");
 
         if (skipScanner) {
             try {
                 Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-                intentNavigationActivity.putExtra("ownLocation", ownLocation);
-                intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
+                intentNavigationActivity.putExtra("startLocation", startLocation);
+                intentNavigationActivity.putExtra("destinationLocation", destinationQRCode);
                 startActivity(intentNavigationActivity);
             } catch (Exception e) {
                 Log.e(TAG + " intend exception", String.valueOf(e));
             }
         }
+
         if (!skipScanner) {
             mScannerView = new ZXingScannerView(this);
             setContentView(mScannerView);
@@ -65,7 +66,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     @Override
     public void handleResult(Result rawResult) {
 
-        ownLocation = rawResult.getText();
+        startLocation = rawResult.getText();
         ArrayList<String> availableRoomsQRCodes = new ArrayList<>();
 
         try {
@@ -76,14 +77,15 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
             }
 
             //If QR-Code is valid -> intent
-            if (availableRoomsQRCodes.contains(ownLocation)) {
+            if (availableRoomsQRCodes.contains(startLocation)) {
                 Intent intentNavigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-                intentNavigationActivity.putExtra("ownLocation", ownLocation);
-                intentNavigationActivity.putExtra("destinationQRCode", destinationQRCode);
+                intentNavigationActivity.putExtra("startLocation", startLocation);
+                intentNavigationActivity.putExtra("destinationLocation", destinationQRCode);
                 startActivity(intentNavigationActivity);
             }
+
             //If QR-Code is invalid -> restart scan
-            if(!availableRoomsQRCodes.contains(ownLocation)) {
+            if(!availableRoomsQRCodes.contains(startLocation)) {
                 mScannerView.stopCameraPreview();
                 mScannerView.stopCamera();
                 mScannerView.startCamera();
@@ -91,6 +93,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
             }
         } catch (Exception e) {
             Log.e(TAG + " intend exception", String.valueOf(e));
+            e.printStackTrace();
         }
     }
 

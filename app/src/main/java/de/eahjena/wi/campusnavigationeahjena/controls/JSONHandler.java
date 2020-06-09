@@ -39,18 +39,21 @@ public class JSONHandler {
 
         } catch (Exception e) {
             Log.e(TAG + " error reading JSON file", String.valueOf(e));
+            e.printStackTrace();
         }
-
         return json;
     }
 
     //Parse JSON to rooms ArrayList<Cell>
     public ArrayList<Room> parseJsonRooms(String json) {
+
         ArrayList<Room> rooms = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
+
             for (int i = 0; i < jsonArray.length(); i++) {
+
                 Room entry = new Room();
 
                 JSONObject jEntry = jsonArray.getJSONObject(i);
@@ -67,23 +70,25 @@ public class JSONHandler {
                 for (int j = 0; j < personsJSON.length(); j++) {
                     persons.add(personsJSON.optString(j));
                 }
-                entry.setPersons(persons);
 
+                entry.setPersons(persons);
                 rooms.add(entry);
             }
         } catch (Exception e) {
             Log.e(TAG + " error parsing JSON rooms", String.valueOf(e));
+            e.printStackTrace();
         }
-
         return rooms;
     }
 
     //Parse JSON to transitions ArrayList<Cell>
     public ArrayList<Transition> parseJsonTransitions(String json) {
+
         ArrayList<Transition> transitions = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
+
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 Transition entry = new Transition();
@@ -93,6 +98,7 @@ public class JSONHandler {
 
                 ArrayList<Cell> connectedCells = new ArrayList<>();
                 JSONArray connectedCellsJSON = jEntry.getJSONArray("connectedCells");
+
                 for (int j = 0; j < connectedCellsJSON.length(); j++) {
 
                     JSONObject cellJSON = connectedCellsJSON.getJSONObject(j);
@@ -107,21 +113,23 @@ public class JSONHandler {
                     connectedCells.add(cell);
                 }
                 entry.setConnectedCells(connectedCells);
-
                 transitions.add(entry);
             }
         } catch (Exception e) {
             Log.e(TAG + " error parsing JSON transitions array", String.valueOf(e));
+            e.printStackTrace();
         }
         return transitions;
     }
 
     //Parse JSON to walkableCells ArrayList<Cell>
     public ArrayList<Cell> parseJsonWalkableCells(String json) {
+
         ArrayList<Cell> walkableCells = new ArrayList<>();
 
         try {
             JSONArray jsonArray = new JSONArray(json);
+
             for (int i = 0; i < jsonArray.length(); i++) {
                 Cell entry = new Cell();
 
@@ -134,9 +142,8 @@ public class JSONHandler {
             }
         } catch (Exception e) {
             Log.e(TAG + " error parsing JSON walkableCells", String.valueOf(e));
+            e.printStackTrace();
         }
-
         return walkableCells;
     }
-
 }
