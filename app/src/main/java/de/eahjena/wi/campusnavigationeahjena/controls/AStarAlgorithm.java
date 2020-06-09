@@ -54,6 +54,7 @@ class AStarAlgorithm {
 
             //Trace back path
             if (closed[endCell.getXCoordinate()][endCell.getYCoordinate()]) {
+
                 Cell current = grid.get(endCell.getXCoordinate()).get(endCell.getYCoordinate());
 
                 while (current.getParent() != null) {

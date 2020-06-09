@@ -138,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             destinationQRCode = rooms.get(i).getQRCode();
                             roomsIndex = i;
                             searchByPersonSpinner.setSelection(0);
-                            personsIndex = 0;
                             findDestinationLocationEditText.setText("");
                         }
                     }
@@ -146,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (item != null && index == 0) {
 
-                    destinationQRCode = JUST_LOCATION;
                     roomsIndex = 0;
                 }
             }
@@ -179,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 destinationQRCode = rooms.get(i).getQRCode();
                                 personsIndex = i;
                                 searchByRoomSpinner.setSelection(0);
-                                roomsIndex = 0;
                                 findDestinationLocationEditText.setText("");
                             }
                         }
@@ -188,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (item != null && index == 0) {
 
-                    destinationQRCode = JUST_LOCATION;
                     personsIndex = 0;
                 }
             }

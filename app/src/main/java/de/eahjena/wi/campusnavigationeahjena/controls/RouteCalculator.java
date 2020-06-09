@@ -111,6 +111,7 @@ public class RouteCalculator {
                 }
 
                 if (index + 1 < grids.size()) {
+
                     //Set endCell with destinationLocation on different floor plans
                     //Transition as endCell, same building
                     if (grids.get(index).get(0).get(0).getBuilding().equals(BUILDING_05)
@@ -143,8 +144,11 @@ public class RouteCalculator {
                             || grids.get(index + 1).get(0).get(0).getBuilding().equals(BUILDING_01))) {
 
                         for (int i = 0; i < usableTransitions.size(); i++) {
+
                             if (usableTransitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
                                 for (int j = 0; j < usableTransitions.get(i).getConnectedCells().size(); j++) {
+
                                     if (usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_04)) {
 
                                         endCell = usableTransitions.get(i).getConnectedCells().get(j);
@@ -161,8 +165,11 @@ public class RouteCalculator {
                             || grids.get(index + 1).get(0).get(0).getBuilding().equals(BUILDING_01))) {
 
                         for (int i = 0; i < usableTransitions.size(); i++) {
+
                             if (usableTransitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
                                 for (int j = 0; j < usableTransitions.get(i).getConnectedCells().size(); j++) {
+
                                     if (usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_05)) {
 
                                         endCell = usableTransitions.get(i).getConnectedCells().get(j);
@@ -179,8 +186,11 @@ public class RouteCalculator {
                             && grids.get(index + 1).get(0).get(0).getBuilding().equals(BUILDING_04)) {
 
                         for (int i = 0; i < usableTransitions.size(); i++) {
+
                             if (usableTransitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
                                 for (int j = 0; j < usableTransitions.get(i).getConnectedCells().size(); j++) {
+
                                     if ((usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_03)
                                             || usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_02)
                                             || usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_01))) {
@@ -199,8 +209,11 @@ public class RouteCalculator {
                             && grids.get(index + 1).get(0).get(0).getBuilding().equals(BUILDING_05)) {
 
                         for (int i = 0; i < usableTransitions.size(); i++) {
+
                             if (usableTransitions.get(i).getTypeOfTransition().equals(TRANSITION_TYPE_CROSSING)) {
+
                                 for (int j = 0; j < usableTransitions.get(i).getConnectedCells().size(); j++) {
+
                                     if ((usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_03)
                                             || usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_02)
                                             || usableTransitions.get(i).getConnectedCells().get(j).getBuilding().equals(BUILDING_01))) {
@@ -217,13 +230,14 @@ public class RouteCalculator {
                         + endCell.getXCoordinate() + "." + endCell.getYCoordinate() + " " + endCell.getWalkability());
 
                 //Get path through floor
-                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index));
+                AStarAlgorithm aStarAlgorithm = new AStarAlgorithm(startCell, endCell, grids.get(index)); //to floor 4 no new cells added, when from building with no 4th floor
                 cellsToWalk.addAll(aStarAlgorithm.getNavigationCellsOnGrid());
 
                 Log.i("_____CELLS_TO_WALK_part_____", String.valueOf(aStarAlgorithm.getNavigationCellsOnGrid()));
 
                 //Set next startCell
                 if (index + 1 < grids.size()) {
+
                     //Same building
                     if (grids.get(index).get(0).get(0).getBuilding().equals(BUILDING_05)
                             && grids.get(index + 1).get(0).get(0).getBuilding().equals(BUILDING_05)) {
