@@ -344,6 +344,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 doIntent(userInputStartLocation, roomNames, false);
             }
 
+            //Use start QR-Code and user destination input to perform navigation
+            if (roomsIndex == 0 && personsIndex == 0 && userInputStartLocation.equals("")
+                    && !userInputDestinationLocation.equals("") && view.getId() == R.id.button_location_qr) {
+
+                destinationQRCode = userInputDestinationLocation;
+
+                doIntent(userInputStartLocation, roomNames, false);
+            }
+
             //Use user start input and destination selection to perform navigation
             if ((roomsIndex != 0 || personsIndex != 0) && !userInputStartLocation.equals("")
                     && userInputDestinationLocation.equals("") && view.getId() == R.id.button_location_text) {

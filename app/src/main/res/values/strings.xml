@@ -34,5 +34,6 @@
     <string name="text_view_explanation_location_description_user">"User input: Enter your position (room number) and press the search button.\n\n"</string>
     <string name="text_view_explanation_navigation_title">"Perform navigation:\n"</string>
     <string name="text_view_explanation_navigation_description_code">"QR-Code: Select a room or person and press the QR-Code button.\n"</string>
-    <string name="text_view_explanation_navigation_description_user">User input: Select a room or person or enter your destination (room number), enter your location (room number) and press the search button.</string>
+    <string name="text_view_explanation_navigation_description_user">User input: Select a room or person or enter your destination (room number), enter your location (room number) and press the search button\n.</string>
+    <string name="text_view_explanation_navigation_description_user_code">User input and QR-Code: Enter your destination (room number) and press the QR-Code button.</string>
 </resources>

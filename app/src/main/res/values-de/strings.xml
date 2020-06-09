@@ -35,5 +35,6 @@
     <string name="text_view_explanation_location_description_user">"Nutzer Eingabe: Gib deine Position ein (Raumnummer) und drücke den Suchen-Button.\n\n"</string>
     <string name="text_view_explanation_navigation_title">Navigation durchführen:\n</string>
     <string name="text_view_explanation_navigation_description_code">QR-Code: Wähle einen Raum oder eine Person und drücke den QR-Code Button.\n</string>
-    <string name="text_view_explanation_navigation_description_user">"Nutzer Eingabe: Wähle einen Raum oder eine Person oder gib dein Ziel ein (Raumnummer), gib deine Position ein (Raumnummer) und drücke den Suchen-Button."</string>
+    <string name="text_view_explanation_navigation_description_user">"Nutzer Eingabe: Wähle einen Raum oder eine Person oder gib dein Ziel ein (Raumnummer), gib deine Position ein (Raumnummer) und drücke den Suchen-Button.\n"</string>
+    <string name="text_view_explanation_navigation_description_user_code">Nutzer Eingabe und QR-Code: Gib dein Ziel ein (Raumnummer) und drücke den QR-Code Button.</string>
 </resources>

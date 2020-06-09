@@ -80,8 +80,19 @@
                 android:text="@string/text_view_explanation_navigation_description_user"
                 android:textColor="@color/text_color"
                 android:textSize="@dimen/text_size_explanations"
-                app:layout_constraintBottom_toTopOf="@id/text_view_by_room"
+                app:layout_constraintBottom_toTopOf="@id/text_view_explanation_navigation_description_user_code"
                 app:layout_constraintTop_toBottomOf="@id/text_view_explanation_navigation_description_code" />
+
+            <TextView
+                android:id="@+id/text_view_explanation_navigation_description_user_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/text_view_explanation_navigation_description_user_code"
+                android:textColor="@color/text_color"
+                android:textSize="@dimen/text_size_explanations"
+                app:layout_constraintBottom_toTopOf="@id/text_view_by_room"
+                app:layout_constraintTop_toBottomOf="@id/text_view_explanation_navigation_description_user" />
 
             <TextView
                 android:id="@+id/text_view_by_room"
@@ -93,7 +104,7 @@
                 android:textSize="@dimen/text_size_header"
                 android:layout_marginTop="@dimen/margin_top_main_activity"
                 app:layout_constraintBottom_toTopOf="@id/spinner_by_room"
-                app:layout_constraintTop_toBottomOf="@id/text_view_explanation_navigation_description_user" />
+                app:layout_constraintTop_toBottomOf="@id/text_view_explanation_navigation_description_user_code" />
 
             <Spinner
                 android:id="@+id/spinner_by_room"
