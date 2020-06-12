@@ -734,7 +734,7 @@ public class RouteCalculator {
             String json;
 
             //Get floor plan JSON from assets
-            json = jsonHandler.readJsonFromAssets(context, getFloorPlan(building, floor) + JSON); //TODO
+            json = jsonHandler.readJsonFromAssets(context, getFloorPlan(building, floor) + JSON);
             ArrayList<Cell> walkableCells = jsonHandler.parseJsonWalkableCells(json);
 
             for (int x = 0; x < GRID_X; x++) {
