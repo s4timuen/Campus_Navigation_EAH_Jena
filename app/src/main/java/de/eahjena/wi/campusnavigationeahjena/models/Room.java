@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Room extends Cell{
 
+    //Constants
     private static final String TAG = "Room"; //$NON-NLS
 
     //Variables
@@ -29,8 +30,10 @@ public class Room extends Cell{
     }
 
     public String getRoomName() {
+
         String roomName;
         roomName = getBuilding() + "." + getFloor() + "." + roomNumber;
+
         return roomName;
     }
 

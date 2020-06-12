@@ -16,9 +16,8 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class ScannerActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
 
+    //Constants
     private static final String TAG = "ScannerActivity"; //$NON-NLS
-
-    //Permission codes
     private static final int REQUEST_CODE_CAMERA = 123;
 
     //Variables
@@ -26,7 +25,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     private boolean mAutoFocus = true;
     private String destinationQRCode;
     private String startLocation;
-    boolean skipScanner;
+    private boolean skipScanner;
     private ArrayList<String> availableRooms;
 
     @Override
@@ -64,6 +63,28 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (!skipScanner) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                mScannerView.setResultHandler(this);
+                mScannerView.startCamera();
+                mScannerView.setAutoFocus(mAutoFocus);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (!skipScanner) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                mScannerView.stopCamera();
+            }
+        }
+    }
+
+    @Override
     public void handleResult(Result rawResult) {
 
         startLocation = rawResult.getText();
@@ -94,28 +115,6 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
         } catch (Exception e) {
             Log.e(TAG + " intend exception", String.valueOf(e));
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!skipScanner) {
-            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                mScannerView.setResultHandler(this);
-                mScannerView.startCamera();
-                mScannerView.setAutoFocus(mAutoFocus);
-            }
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (!skipScanner) {
-            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                mScannerView.stopCamera();
-            }
         }
     }
 }

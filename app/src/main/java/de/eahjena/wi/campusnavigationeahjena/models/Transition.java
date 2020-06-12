@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 public class Transition extends Cell{
 
-    private static final String TAG = "Transition"; //$NON-NLS
-
     //Constants
+    private static final String TAG = "Transition"; //$NON-NLS
     private static final String BUILDING_01 = "01";
     private static final String BUILDING_02 = "02";
     private static final String BUILDING_03 = "03";

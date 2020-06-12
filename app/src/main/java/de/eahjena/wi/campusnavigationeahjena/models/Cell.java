@@ -2,6 +2,7 @@ package de.eahjena.wi.campusnavigationeahjena.models;
 
 public class Cell {
 
+    //Constants
     private static final String TAG = "Cell"; //$NON-NLS
 
     //Variables
@@ -17,7 +18,7 @@ public class Cell {
     //Constructors
     public Cell() {
     }
-    public Cell(int xCoordinate, int yCoordinate,String building, String floor, boolean walkable) {
+    public Cell(int xCoordinate, int yCoordinate, String building, String floor, boolean walkable) {
         this.xCoordinate = xCoordinate;
         this.yCoordinate = yCoordinate;
         this. building = building;
@@ -109,7 +110,7 @@ public class Cell {
         return parent;
     }
 
-    public boolean getWalkability() {return walkable;}
+    public boolean getWalkability() { return walkable; }
 
     //Setter
     public void setHeuristicCost(int heuristicCost) {

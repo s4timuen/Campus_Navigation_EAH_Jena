@@ -51,7 +51,7 @@ public class RouteCalculator {
     private Cell startLocation;
     private Cell destinationLocation;
     private ArrayList<Cell> cellsToWalk = new ArrayList<>();
-    ArrayList<ArrayList<ArrayList<Cell>>> grids = new ArrayList<>();
+    private ArrayList<ArrayList<ArrayList<Cell>>> grids = new ArrayList<>();
 
     //Constructor
     public RouteCalculator(Context context, Room startLocation, Room destinationLocation, ArrayList<Transition> transitions) {
@@ -734,7 +734,7 @@ public class RouteCalculator {
             String json;
 
             //Get floor plan JSON from assets
-            json = jsonHandler.readJsonFromAssets(context, getFloorPlan(building, floor) + JSON);
+            json = jsonHandler.readJsonFromAssets(context, getFloorPlan(building, floor) + JSON); //TODO
             ArrayList<Cell> walkableCells = jsonHandler.parseJsonWalkableCells(json);
 
             for (int x = 0; x < GRID_X; x++) {
@@ -800,6 +800,7 @@ public class RouteCalculator {
                 break;
             case "01.04":
             case "02.04":
+            case "03.04":
                 floorPlan = BUILDING_03_02_01_FLOOR_04;
                 break;
             case "04.ug":

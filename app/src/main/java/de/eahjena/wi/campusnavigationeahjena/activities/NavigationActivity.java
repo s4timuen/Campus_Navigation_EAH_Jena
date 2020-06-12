@@ -27,9 +27,8 @@ import de.eahjena.wi.campusnavigationeahjena.models.Transition;
 
 public class NavigationActivity extends AppCompatActivity {
 
-    private static final String TAG = "NavigationActivity"; //$NON-NLS
-
     //Constants
+    private static final String TAG = "NavigationActivity"; //$NON-NLS
     private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
     private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
     private static final String BUILDING_03_02_01_FLOOR_01 = "building_03_02_01_floor_01";
@@ -59,6 +58,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private static final String JSON_FILE_ROOMS = "rooms.json";
     private static final String JSON_FILE_TRANSITIONS = "transitions.json";
+
     private static final String JUST_LOCATION = "location";
 
     private static final int X_SCALING_PORTRAIT = 9;
@@ -81,11 +81,16 @@ public class NavigationActivity extends AppCompatActivity {
     private ArrayList<Cell> cellsToWalk = new ArrayList<>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Get extra from parent
+        Intent intendScannerActivity = getIntent();
+        ownLocation = intendScannerActivity.getStringExtra("startLocation");
+        destinationQRCode = intendScannerActivity.getStringExtra("destinationLocation");
 
         //Spinner select floor plans
         final ArrayList<String> floorPlans = new ArrayList<>(getItemsSpinner());
@@ -119,11 +124,6 @@ public class NavigationActivity extends AppCompatActivity {
             }
         });
 
-        //Get extra from parent
-        Intent intendScannerActivity = getIntent();
-        ownLocation = intendScannerActivity.getStringExtra("startLocation");
-        destinationQRCode = intendScannerActivity.getStringExtra("destinationLocation");
-
         //Get rooms, stairs, elevators and crossings from JSON
         getRoomsAndTransitions();
 
@@ -147,12 +147,12 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
     }
 
@@ -210,6 +210,7 @@ public class NavigationActivity extends AppCompatActivity {
             for (int i = 0; i < rooms.size(); i++) {
 
                 if (rooms.get(i).getQRCode().equals(ownLocation)) {
+
                     startLocation = rooms.get(i);
                 }
             }
@@ -227,6 +228,7 @@ public class NavigationActivity extends AppCompatActivity {
             for (int i = 0; i < rooms.size(); i++) {
 
                 if (rooms.get(i).getQRCode().equals(destinationQRCode)) {
+
                     destinationLocation = rooms.get(i);
                 }
             }
@@ -407,6 +409,7 @@ public class NavigationActivity extends AppCompatActivity {
     private String getLocaleStringResource(Locale currentLocale, int floorPlan) {
 
         String localeString = "";
+
         try {
             Configuration configuration = new Configuration(this.getResources().getConfiguration());
             configuration.setLocale(currentLocale);
@@ -427,7 +430,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     //Draw path cells
-    private void drawPathCells(int index, int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
+    private void drawPathCell(int index, int xOffset, int xScaling, int yOffset, int yScaling, RelativeLayout relativeLayout) {
 
         ImageView pathCellIcon = new ImageView(this);
         pathCellIcon.setImageResource(R.drawable.path_cell_icon);
@@ -466,7 +469,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     //Draw transitions
-    private void drawTransitions(String building, String floor, int xScaling, int yScaling, int xOffset, int yOffset, int i, int j, RelativeLayout relativeLayout) {
+    private void drawTransition(String building, String floor, int xScaling, int yScaling, int xOffset, int yOffset, int i, int j, RelativeLayout relativeLayout) {
 
         if (transitions.get(i).getConnectedCells().get(j).getBuilding().equals(building)
                 && transitions.get(i).getConnectedCells().get(j).getFloor().equals(floor)) {
@@ -566,13 +569,13 @@ public class NavigationActivity extends AppCompatActivity {
                     if (cellsToWalk.get(j).getBuilding().equals(BUILDING_05) && building.equals(BUILDING_05)
                             && cellsToWalk.get(j).getFloor().equals(floor)) {
 
-                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                        drawPathCell(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
 
                     if (cellsToWalk.get(j).getBuilding().equals(BUILDING_04) && building.equals(BUILDING_04)
                             && cellsToWalk.get(j).getFloor().equals(floor)) {
 
-                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                        drawPathCell(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
 
                     if ((cellsToWalk.get(j).getBuilding().equals(BUILDING_03)
@@ -580,7 +583,7 @@ public class NavigationActivity extends AppCompatActivity {
                             || cellsToWalk.get(j).getBuilding().equals(BUILDING_01))
                             && buildingsThreeTwoOne && cellsToWalk.get(j).getFloor().equals(floor)) {
 
-                        drawPathCells(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
+                        drawPathCell(j, xOffset, xScaling, yOffset, yScaling, relativeLayout);
                     }
                 }
             }
@@ -650,14 +653,14 @@ public class NavigationActivity extends AppCompatActivity {
 
                     if (building.equals(BUILDING_01) || building.equals(BUILDING_02) || building.equals(BUILDING_03)) {
 
-                        drawTransitions(BUILDING_01, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
-                        drawTransitions(BUILDING_02, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
-                        drawTransitions(BUILDING_03, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransition(BUILDING_01, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransition(BUILDING_02, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransition(BUILDING_03, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                     }
 
                     if (building.equals(BUILDING_04) || building.equals(BUILDING_05)) {
 
-                        drawTransitions(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
+                        drawTransition(building, floor, xScaling, yScaling, xOffset, yOffset, i, j, relativeLayout);
                     }
                 }
             }

@@ -31,19 +31,18 @@ import de.eahjena.wi.campusnavigationeahjena.models.Room;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "MainActivity"; //$NON-NLS
-
     //Constants
+    private static final String TAG = "MainActivity"; //$NON-NLS
     private static final String JUST_LOCATION = "location";
     private static final String JSON_FILE_ROOMS = "rooms.json";
 
     //Variables
     private String destinationQRCode;
     private ArrayList<Room> rooms = new ArrayList<>();
-    private TextInputLayout findStartLocationLayoutText;
-    private TextInputEditText findStartLocationEditText;
-    private TextInputLayout findDestinationLocationLayoutText;
-    private TextInputEditText findDestinationLocationEditText;
+    private TextInputLayout startLocationLayoutText;
+    private TextInputEditText startLocationEditText;
+    private TextInputLayout destinationLocationLayoutText;
+    private TextInputEditText destinationLocationEditText;
     private int roomsIndex = 0;
     private int personsIndex = 0;
 
@@ -138,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             destinationQRCode = rooms.get(i).getQRCode();
                             roomsIndex = i;
                             searchByPersonSpinner.setSelection(0);
-                            findDestinationLocationEditText.setText("");
+                            destinationLocationEditText.setText("");
                         }
                     }
                 }
@@ -177,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 destinationQRCode = rooms.get(i).getQRCode();
                                 personsIndex = i;
                                 searchByRoomSpinner.setSelection(0);
-                                findDestinationLocationEditText.setText("");
+                                destinationLocationEditText.setText("");
                             }
                         }
                     }
@@ -196,9 +195,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         //Start location input field
-        findStartLocationLayoutText = findViewById(R.id.input_field_search_start_room_layout);
-        findStartLocationEditText = findViewById(R.id.input_field_search_start_room_edit);
-        findStartLocationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        startLocationLayoutText = findViewById(R.id.input_field_search_start_room_layout);
+        startLocationEditText = findViewById(R.id.input_field_search_start_room_edit);
+        startLocationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -212,9 +211,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         //Destination location input field
-        findDestinationLocationLayoutText = findViewById(R.id.input_field_search_destination_room_layout);
-        findDestinationLocationEditText = findViewById(R.id.input_field_search_destination_room_edit);
-        findDestinationLocationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        destinationLocationLayoutText = findViewById(R.id.input_field_search_destination_room_layout);
+        destinationLocationEditText = findViewById(R.id.input_field_search_destination_room_edit);
+        destinationLocationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -275,8 +274,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //User input error handling and input combinations error handling
     private void handleUserInputErrorAndIntent(View view) {
 
-        String userInputStartLocation = Objects.requireNonNull(findStartLocationEditText.getText()).toString().replace(".", "");
-        String userInputDestinationLocation = Objects.requireNonNull(findDestinationLocationEditText.getText()).toString().replace(".", "");
+        String userInputStartLocation = Objects.requireNonNull(startLocationEditText.getText()).toString().replace(".", "");
+        String userInputDestinationLocation = Objects.requireNonNull(destinationLocationEditText.getText()).toString().replace(".", "");
 
         ArrayList<String> roomNames = new ArrayList<>();
 
@@ -287,33 +286,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         //User start location input error handling
-        if (!findStartLocationEditText.getText().toString().equals("")
-                && !roomNames.contains(findStartLocationEditText.getText().toString())) {
+        if (!startLocationEditText.getText().toString().equals("")
+                && !roomNames.contains(startLocationEditText.getText().toString())) {
 
-            findStartLocationLayoutText.setError(getText(R.string.error_message_room_input));
+            startLocationLayoutText.setError(getText(R.string.error_message_room_input));
         }
 
-        if (findStartLocationEditText.getText().toString().equals("")
-                || roomNames.contains(findStartLocationEditText.getText().toString())) {
+        if (startLocationEditText.getText().toString().equals("")
+                || roomNames.contains(startLocationEditText.getText().toString())) {
 
-            findStartLocationLayoutText.setError(null);
+            startLocationLayoutText.setError(null);
         }
 
         //User destination location input error handling
-        if (!findDestinationLocationEditText.getText().toString().equals("")
-                && !roomNames.contains(findDestinationLocationEditText.getText().toString())) {
+        if (!destinationLocationEditText.getText().toString().equals("")
+                && !roomNames.contains(destinationLocationEditText.getText().toString())) {
 
-            findDestinationLocationLayoutText.setError(getText(R.string.error_message_room_input));
+            destinationLocationLayoutText.setError(getText(R.string.error_message_room_input));
         }
 
-        if (findDestinationLocationEditText.getText().toString().equals("")
-                || roomNames.contains(findDestinationLocationEditText.getText().toString())) {
+        if (destinationLocationEditText.getText().toString().equals("")
+                || roomNames.contains(destinationLocationEditText.getText().toString())) {
 
-            findDestinationLocationLayoutText.setError(null);
+            destinationLocationLayoutText.setError(null);
         }
 
         //Input combinations error handling
-        if (findStartLocationLayoutText.getError() == null && findDestinationLocationLayoutText.getError() == null) {
+        if (startLocationLayoutText.getError() == null && destinationLocationLayoutText.getError() == null) {
 
             //Use start QR-Code to show own position
             if (roomsIndex == 0 && personsIndex == 0 && userInputStartLocation.equals("")
