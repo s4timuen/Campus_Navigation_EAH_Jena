@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //Constants
     private static final String TAG = "MainActivity"; //$NON-NLS
+
     private static final String JUST_LOCATION = "location";
     private static final String JSON_FILE_ROOMS = "rooms.json";
 

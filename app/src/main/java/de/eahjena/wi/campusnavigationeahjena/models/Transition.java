@@ -6,6 +6,7 @@ public class Transition extends Cell{
 
     //Constants
     private static final String TAG = "Transition"; //$NON-NLS
+
     private static final String BUILDING_01 = "01";
     private static final String BUILDING_02 = "02";
     private static final String BUILDING_03 = "03";

@@ -12,9 +12,9 @@ import de.eahjena.wi.campusnavigationeahjena.models.Transition;
 
 class AStarAlgorithm {
 
+    //Constants
     private static final String TAG = "AStarAlgorithm"; //$NON-NLS
 
-    //Constants
     private static final int COSTS_CELL = 1;
     private static final int COSTS_ROOM = 1;
     private static final int COSTS_TRANSITION = 2;

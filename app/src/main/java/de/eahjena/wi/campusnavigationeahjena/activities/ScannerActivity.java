@@ -18,6 +18,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
 
     //Constants
     private static final String TAG = "ScannerActivity"; //$NON-NLS
+
     private static final int REQUEST_CODE_CAMERA = 123;
 
     //Variables

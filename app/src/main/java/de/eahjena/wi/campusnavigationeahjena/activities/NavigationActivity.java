@@ -29,6 +29,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     //Constants
     private static final String TAG = "NavigationActivity"; //$NON-NLS
+
     private static final String BUILDING_03_02_01_FLOOR_UG = "building_03_02_01_floor_ug";
     private static final String BUILDING_03_02_01_FLOOR_00 = "building_03_02_01_floor_00";
     private static final String BUILDING_03_02_01_FLOOR_01 = "building_03_02_01_floor_01";

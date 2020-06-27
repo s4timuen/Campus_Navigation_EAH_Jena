@@ -17,6 +17,7 @@ import de.eahjena.wi.campusnavigationeahjena.models.Transition;
 
 public class JSONHandler {
 
+    //Constants
     private static final String TAG = "JSONHandler"; //$NON-NLS
 
     //Constructor
